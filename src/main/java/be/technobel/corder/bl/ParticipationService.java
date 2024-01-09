@@ -8,4 +8,5 @@ import java.util.List;
 public interface ParticipationService {
     Participation create(ParticipationForm participationForm);
     List<Participation> findAll();
+    Participation findById(Long id);
 }

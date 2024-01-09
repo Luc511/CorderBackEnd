@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -113,6 +114,31 @@ public class ParticipationServiceImplUnitTest {
         List<Participation> result = participationService.findAll();
 
         assertEquals(expected, result);
+    }
+
+    @Test
+    public void findById_existingId_shouldReturnParticipation() {
+        // Given
+        Long id = 1L;
+        Participation expectedParticipation = new Participation();
+        expectedParticipation.setId(id);
+        when(participationRepository.findById(id)).thenReturn(Optional.of(expectedParticipation));
+
+        // When
+        Participation actualParticipation = participationService.findById(id);
+
+        // Then
+        assertTrue(expectedParticipation == actualParticipation);
+    }
+
+    @Test
+    void findById_nonExistingId_shouldThrowException() {
+        // Given
+        Long id = 2L;
+        when(participationRepository.findById(id)).thenReturn(Optional.empty());
+
+        // When & Then
+        assertThrows(EntityNotFoundException.class, () -> participationService.findById(id));
     }
 
 }

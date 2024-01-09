@@ -7,6 +7,7 @@ import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -68,5 +69,11 @@ public class ParticipationServiceImpl implements ParticipationService {
     @Override
     public List<Participation> findAll() {
         return participationRepository.findAll();
+    }
+
+    @Override
+    public Participation findById(Long id) {
+        return participationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Participation avec l'id: " + id + " introuvable")
+        );
     }
 }
