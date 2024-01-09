@@ -76,5 +76,4 @@ public class ParticipationServiceImpl implements ParticipationService {
         return participationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Participation avec l'id: " + id + " introuvable")
         );
     }
-    //test new url
 }
