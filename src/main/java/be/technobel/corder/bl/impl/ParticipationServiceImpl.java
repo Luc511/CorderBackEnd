@@ -3,11 +3,13 @@ package be.technobel.corder.bl.impl;
 import be.technobel.corder.bl.ParticipationService;
 import be.technobel.corder.dl.models.Address;
 import be.technobel.corder.dl.models.Participation;
+import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -31,7 +33,7 @@ public class ParticipationServiceImpl implements ParticipationService {
             throw new DuplicateParticipationException("Ce participant a déjà joué avec cet email !");
         }
 
-        String address = participation.getAddress().toString();
+        String address = formatAddress(participation);
 
         List<String> addresses = findAll().stream()
                 .map(this::formatAddress)
@@ -53,7 +55,13 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     public Participation create(ParticipationForm participationForm) {
+        Participation participation = participationForm.toEntity();
+
         isUniqueParticipant(participationForm.toEntity());
+
+        participation.setStatus(Status.PENDING);
+        participation.setParticipationDate(LocalDate.now());
+
         return participationRepository.save(participationForm.toEntity());
     }
 
