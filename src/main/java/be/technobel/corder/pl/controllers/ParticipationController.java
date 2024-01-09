@@ -7,7 +7,9 @@ import be.technobel.corder.pl.models.dtos.ParticipationDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -36,5 +38,10 @@ public class ParticipationController {
     public ResponseEntity<ParticipationByIdDTO> getParticipationById(@PathVariable Long id) {
         Participation participation = participationService.findById(id);
         return ResponseEntity.ok(ParticipationByIdDTO.fromEntity(participation));
+    }
+    @PostMapping("/photo/{id}")
+    public ResponseEntity<ParticipationDTO> addPhoto(@RequestParam("photo") MultipartFile photo, @PathVariable Long id) {
+        Participation participation = participationService.addPhoto(photo, id);
+        return ResponseEntity.ok(ParticipationDTO.fromEntity(participation));
     }
 }

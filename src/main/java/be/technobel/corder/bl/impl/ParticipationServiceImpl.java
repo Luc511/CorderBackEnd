@@ -6,10 +6,13 @@ import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
+import be.technobel.corder.pl.config.exceptions.PhotoException;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -75,5 +78,18 @@ public class ParticipationServiceImpl implements ParticipationService {
     public Participation findById(Long id) {
         return participationRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Participation avec l'id: " + id + " introuvable")
         );
+    }
+
+    @Override
+    public Participation addPhoto(MultipartFile photo, Long id) {
+        try {
+            Participation entity = findById(id);
+            entity.setBlob(photo.getBytes());
+            entity.setPictureName(photo.getOriginalFilename());
+            entity.setPictureType(photo.getContentType());
+            return participationRepository.save(entity);
+        } catch (IOException e) {
+            throw new PhotoException("Impossible d'ajouter une photo au participant avec l'id:  " + id);
+        }
     }
 }

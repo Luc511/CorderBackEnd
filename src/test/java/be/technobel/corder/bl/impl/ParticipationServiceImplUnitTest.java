@@ -12,10 +12,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
@@ -139,6 +142,48 @@ public class ParticipationServiceImplUnitTest {
 
         // When & Then
         assertThrows(EntityNotFoundException.class, () -> participationService.findById(id));
+    }
+
+    @Test
+    public void addPhotoTest() throws IOException {
+        Participation participation = new Participation();
+        MultipartFile file = Mockito.mock(MultipartFile.class);
+        byte[] data = "example".getBytes();
+        when(file.getBytes()).thenReturn(data);
+        when(participationRepository.findById(anyLong())).thenReturn(Optional.of(participation));
+        when(participationRepository.save(participation)).thenReturn(participation);
+
+        Participation updatedParticipation = participationService.addPhoto(file, 1L);
+
+        assertEquals(data, updatedParticipation.getBlob(), "Blob must have the same data");
+        assertEquals(file.getOriginalFilename(), updatedParticipation.getPictureName(), "PictureName must be same");
+        assertEquals(file.getContentType(), updatedParticipation.getPictureType(), "PictureType must be same");
+    }
+
+    @Test
+    public void addPhotoTest_EntityNotFound() {
+        MultipartFile file = Mockito.mock(MultipartFile.class);
+        when(participationRepository.findById(anyLong())).thenThrow(new EntityNotFoundException("Participation avec l'id: 1 introuvable"));
+
+        try {
+            participationService.addPhoto(file, 1L);
+        } catch (EntityNotFoundException e) {
+            assertEquals("Participation avec l'id: 1 introuvable", e.getMessage());
+        }
+    }
+
+    @Test
+    public void addPhotoTest_PhotoException() throws IOException {
+        MultipartFile file = Mockito.mock(MultipartFile.class);
+        when(file.getBytes()).thenThrow(new IOException());
+        Participation participation = new Participation();
+        when(participationRepository.findById(anyLong())).thenReturn(Optional.of(participation));
+
+        try {
+            participationService.addPhoto(file, 1L);
+        } catch (RuntimeException e) {
+            assertEquals("Impossible d'ajouter une photo au participant avec l'id:  1", e.getMessage());
+        }
     }
 
 }

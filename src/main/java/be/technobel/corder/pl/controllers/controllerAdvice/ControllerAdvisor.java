@@ -1,11 +1,13 @@
 package be.technobel.corder.pl.controllers.controllerAdvice;
 
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
+import be.technobel.corder.pl.config.exceptions.PhotoException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MultipartException;
 
 @RestControllerAdvice
 public class ControllerAdvisor {
@@ -14,14 +16,19 @@ public class ControllerAdvisor {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-//    @ExceptionHandler(PhotoException.class)
-//    public ResponseEntity<String> handlePhotoException(PhotoException e) {
-//        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-//    }
+    @ExceptionHandler(PhotoException.class)
+    public ResponseEntity<String> handlePhotoException(PhotoException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<String> handleEntityNotFoundException(EntityNotFoundException e) {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<String> handleMultipartException(MultipartException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
 //    @ExceptionHandler(UsernameNotFoundException.class)
