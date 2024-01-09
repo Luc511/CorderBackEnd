@@ -66,7 +66,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         participation.setStatus(Status.PENDING);
         participation.setParticipationDate(LocalDate.now());
 
-        return participationRepository.save(participationForm.toEntity());
+        return participationRepository.save(participation);
     }
 
     @Override

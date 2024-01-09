@@ -5,7 +5,7 @@ import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.pl.models.dtos.ParticipationByIdDTO;
 import be.technobel.corder.pl.models.dtos.ParticipationDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -40,8 +40,16 @@ public class ParticipationController {
         return ResponseEntity.ok(ParticipationByIdDTO.fromEntity(participation));
     }
     @PostMapping("/photo/{id}")
-    public ResponseEntity<ParticipationDTO> addPhoto(@RequestParam("photo") MultipartFile photo, @PathVariable Long id) {
-        Participation participation = participationService.addPhoto(photo, id);
-        return ResponseEntity.ok(ParticipationDTO.fromEntity(participation));
+    public ResponseEntity<?> addPhoto(@RequestParam("photo") MultipartFile photo, @PathVariable Long id) {
+        participationService.addPhoto(photo, id);
+        return ResponseEntity.ok().build();
+    }
+    @GetMapping("/photo")
+    public ResponseEntity<?> getPhoto(@RequestParam("id") Long id) {
+        Participation participation = participationService.findById(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType(participation.getPictureType()));
+        headers.setContentDisposition(ContentDisposition.builder("attachment").filename(participation.getPictureName()).build());
+        return new ResponseEntity<>(participation.getBlob(), headers, HttpStatus.OK);
     }
 }
