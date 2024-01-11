@@ -7,6 +7,7 @@ import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
+import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -184,6 +185,23 @@ public class ParticipationServiceImplUnitTest {
         } catch (RuntimeException e) {
             assertEquals("Impossible d'ajouter une photo au participant avec l'id:  1", e.getMessage());
         }
+    }
+
+    @Test
+    public void shouldAddSatisfactionScore() {
+        //Given
+        SatisfactionForm mockForm = new SatisfactionForm(1L, 3, "test");
+        Participation mockParticipation = new Participation();
+
+        when(participationRepository.findById(any(Long.class))).thenReturn(Optional.of(mockParticipation));
+        when(participationRepository.save(any(Participation.class))).thenReturn(mockParticipation);
+
+        //When
+        Participation result = participationService.addSatisfaction(mockForm);
+
+        //Then
+        assertEquals(result.getSatisfaction(), mockForm.satisfaction());
+        verify(participationRepository, times(1)).save(any(Participation.class));
     }
 
 }

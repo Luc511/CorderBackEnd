@@ -8,6 +8,7 @@ import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
 import be.technobel.corder.pl.config.exceptions.PhotoException;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
+import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -91,5 +92,15 @@ public class ParticipationServiceImpl implements ParticipationService {
         } catch (IOException e) {
             throw new PhotoException("Impossible d'ajouter une photo au participant avec l'id:  " + id);
         }
+    }
+
+    @Override
+    public Participation addSatisfaction(SatisfactionForm satisfactionForm) {
+        Participation participation = findById(satisfactionForm.id());
+        participation.setSatisfaction(satisfactionForm.satisfaction());
+        if (satisfactionForm.satisfactionComment() != null) {
+            participation.setSatisfactionComment(satisfactionForm.satisfactionComment());
+        }
+        return participationRepository.save(participation);
     }
 }
