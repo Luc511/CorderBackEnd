@@ -2,10 +2,12 @@ package be.technobel.corder.pl.controllers;
 
 import be.technobel.corder.bl.UserService;
 import be.technobel.corder.pl.models.forms.LoginForm;
+import be.technobel.corder.pl.models.forms.PasswordChangeForm;
 import be.technobel.corder.pl.models.forms.UserForm;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,5 +31,12 @@ public class UserController {
     public ResponseEntity<String> register(@RequestBody @Valid UserForm form){
         userService.register(form);
         return ResponseEntity.ok("User created");
+    }
+
+    @PreAuthorize("isAnonymous()")
+    @PatchMapping("/changePassword")
+    public ResponseEntity<String> changePassword(@RequestBody @Valid PasswordChangeForm form) {
+        userService.changePassword(form);
+        return ResponseEntity.ok("Password changed successfully");
     }
 }

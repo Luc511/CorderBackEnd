@@ -1,6 +1,7 @@
 package be.technobel.corder.pl.controllers.controllerAdvice;
 
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
+import be.technobel.corder.pl.config.exceptions.InvalidPasswordException;
 import be.technobel.corder.pl.config.exceptions.PhotoException;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.http.HttpStatus;
@@ -66,8 +67,12 @@ public class ControllerAdvisor {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        // Créez votre propre structure de réponse au besoin.
         String errorResponse = "Bad Input: " + ex.getMessage();
         return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
     }
+    @ExceptionHandler(InvalidPasswordException.class)
+    public ResponseEntity<String> handleInvalidPasswordException(InvalidPasswordException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
 }
