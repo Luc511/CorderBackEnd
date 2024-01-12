@@ -5,6 +5,7 @@ import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.pl.models.dtos.ParticipationByIdDTO;
 import be.technobel.corder.pl.models.dtos.ParticipationDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
+import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -41,9 +42,9 @@ public class ParticipationController {
         return ResponseEntity.ok(ParticipationByIdDTO.fromEntity(participation));
     }
     @PostMapping("/photo/{id}")
-    public ResponseEntity<?> addPhoto(@RequestParam("photo") MultipartFile photo, @PathVariable Long id) {
+    public ResponseEntity<String> addPhoto(@RequestParam("photo") MultipartFile photo, @PathVariable Long id) {
         participationService.addPhoto(photo, id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok("Photo added to participation");
     }
     @GetMapping("/photo")
     public ResponseEntity<?> getPhoto(@RequestParam("id") Long id) {
@@ -52,5 +53,11 @@ public class ParticipationController {
         headers.setContentType(MediaType.parseMediaType(participation.getPictureType()));
         headers.setContentDisposition(ContentDisposition.builder("attachment").filename(participation.getPictureName()).build());
         return new ResponseEntity<>(participation.getBlob(), headers, HttpStatus.OK);
+    }
+
+    @PostMapping("/rating")
+    public ResponseEntity<String> addRating(@Valid @RequestBody SatisfactionForm satisfactionForm) {
+        participationService.addSatisfaction(satisfactionForm);
+        return ResponseEntity.ok("Rating added to participation");
     }
 }
