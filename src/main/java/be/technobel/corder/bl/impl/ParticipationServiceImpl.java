@@ -1,5 +1,6 @@
 package be.technobel.corder.bl.impl;
 
+import be.technobel.corder.bl.MailService;
 import be.technobel.corder.bl.ParticipationService;
 import be.technobel.corder.dl.models.Address;
 import be.technobel.corder.dl.models.Participation;
@@ -15,15 +16,19 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ParticipationServiceImpl implements ParticipationService {
 
     private final ParticipationRepository participationRepository;
+    private final MailService mailService;
 
-    public ParticipationServiceImpl(ParticipationRepository participationRepository) {
+    public ParticipationServiceImpl(ParticipationRepository participationRepository, MailService mailService) {
         this.participationRepository = participationRepository;
+        this.mailService = mailService;
     }
 
     private void isUniqueParticipant(Participation participation) {
@@ -66,6 +71,12 @@ public class ParticipationServiceImpl implements ParticipationService {
 
         participation.setStatus(Status.PENDING);
         participation.setParticipationDate(LocalDate.now());
+
+        //MAIL
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("greeting", "Merci " + participationForm.firstName() + " !");
+        String content = mailService.buildEmailTemplate("email-validation-template", variables);
+        mailService.sendMail(participationForm.email(), "Validation de la participation", content, true);
 
         return participationRepository.save(participation);
     }
