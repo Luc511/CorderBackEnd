@@ -17,5 +17,12 @@ Spring:
       max-file-size: 5MB
       max-request-size: 5MB
 
+  mail:
+    host: ${SMTP_HOST}
+    port: ${SMTP_PORT}
+    username: ${SMTP_USERNAME}
+    password: ${SMTP_PASSWORD}
+
+
 server:
   port: 8080

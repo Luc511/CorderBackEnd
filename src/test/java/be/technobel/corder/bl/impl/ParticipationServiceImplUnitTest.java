@@ -1,5 +1,6 @@
 package be.technobel.corder.bl.impl;
 
+import be.technobel.corder.bl.MailService;
 import be.technobel.corder.bl.ParticipationService;
 import be.technobel.corder.dl.models.Address;
 import be.technobel.corder.dl.models.Participation;
@@ -36,11 +37,12 @@ public class ParticipationServiceImplUnitTest {
 
     ParticipationRepository participationRepository;
     ParticipationServiceImpl participationService;
+    MailServiceImpl mailService;
 
     @BeforeEach
     public void setUp() {
         participationRepository = mock(ParticipationRepository.class);
-        participationService = new ParticipationServiceImpl(participationRepository);
+        participationService = new ParticipationServiceImpl(participationRepository, mailService);
     }
 
     @Test
