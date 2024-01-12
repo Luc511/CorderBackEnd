@@ -5,6 +5,7 @@ import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.pl.models.dtos.ParticipationByIdDTO;
 import be.technobel.corder.pl.models.dtos.ParticipationDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
+import jakarta.validation.Valid;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,7 +24,7 @@ public class ParticipationController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<ParticipationDTO> createParticipation(@RequestBody ParticipationForm participationForm) {
+    public ResponseEntity<ParticipationDTO> createParticipation(@Valid @RequestBody ParticipationForm participationForm) {
         return ResponseEntity.ok(ParticipationDTO.fromEntity(participationService.create(participationForm)));
     }
     @GetMapping("/")
