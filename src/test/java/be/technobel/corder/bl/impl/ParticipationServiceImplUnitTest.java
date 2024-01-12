@@ -42,6 +42,7 @@ public class ParticipationServiceImplUnitTest {
     @BeforeEach
     public void setUp() {
         participationRepository = mock(ParticipationRepository.class);
+        mailService = mock(MailServiceImpl.class);
         participationService = new ParticipationServiceImpl(participationRepository, mailService);
     }
 
