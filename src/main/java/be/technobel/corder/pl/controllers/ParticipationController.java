@@ -9,6 +9,7 @@ import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import jakarta.validation.Valid;
 import org.springframework.http.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,7 @@ public class ParticipationController {
     public ResponseEntity<ParticipationDTO> createParticipation(@Valid @RequestBody ParticipationForm participationForm) {
         return ResponseEntity.ok(ParticipationDTO.fromEntity(participationService.create(participationForm)));
     }
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/")
     public ResponseEntity<List<ParticipationDTO>> getAllParticipations() {
         List<ParticipationDTO> participations = participationService.findAll()
@@ -38,6 +40,7 @@ public class ParticipationController {
                 .toList();
         return ResponseEntity.ok(participations);
     }
+    @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/{id}")
     public ResponseEntity<ParticipationByIdDTO> getParticipationById(@PathVariable Long id) {
         Participation participation = participationService.findById(id);
@@ -48,6 +51,7 @@ public class ParticipationController {
         participationService.addPhoto(photo, id);
         return ResponseEntity.ok("Photo added to participation");
     }
+    @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/photo")
     public ResponseEntity<?> getPhoto(@RequestParam("id") Long id) {
         Participation participation = participationService.findById(id);
@@ -63,28 +67,33 @@ public class ParticipationController {
         return ResponseEntity.ok("Rating added to participation");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/validate")
     public ResponseEntity<String> validate(@RequestParam Long id) {
         participationService.validate(id);
         return ResponseEntity.ok("Participation validated");
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/deny")
     public ResponseEntity<String> deny(@RequestParam Long id) {
         participationService.deny(id);
         return ResponseEntity.ok("Participation denied");
     }
 
+    @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @PatchMapping("/ship")
     public ResponseEntity<String> ship(@RequestParam Long id) {
         participationService.ship(id);
         return ResponseEntity.ok("Participation shipped");
     }
 
+    @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/getWeek")
     public ResponseEntity<Long[]> getWeek(@RequestParam LocalDate firstDay) {
         return ResponseEntity.ok(participationService.getWeek(firstDay));
     }
+    @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/stats")
     public ResponseEntity<StatsDTO> getAllStats() {
         return ResponseEntity.ok(participationService.statsDTOBuilder());

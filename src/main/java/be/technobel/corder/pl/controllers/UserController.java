@@ -33,7 +33,7 @@ public class UserController {
         return ResponseEntity.ok("User created");
     }
 
-    @PreAuthorize("isAnonymous()")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/changePassword")
     public ResponseEntity<String> changePassword(@RequestBody @Valid PasswordChangeForm form) {
         userService.changePassword(form);
