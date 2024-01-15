@@ -37,7 +37,7 @@ services:
       - POSTGRES_DB=corder
       - POSTGRES_USERNAME=postgres
       - POSTGRES_PASSWORD=postgres
-      - DDL=create
+      - DDL=validate
       - SMTP_HOST=sandbox.smtp.mailtrap.io
       - SMTP_PASSWORD=570e8bf1b9ab8a
       - SMTP_PORT=25

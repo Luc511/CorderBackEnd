@@ -78,7 +78,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         Map<String, Object> variables = new HashMap<>();
         variables.put("greeting", "Merci " + participationForm.firstName() + " !");
         String content = mailService.buildEmailTemplate("email-validation-template", variables);
-        //mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
+        mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
 
         return participationRepository.save(participation);
     }
