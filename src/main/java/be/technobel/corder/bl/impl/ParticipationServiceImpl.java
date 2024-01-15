@@ -12,6 +12,7 @@ import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -76,7 +77,7 @@ public class ParticipationServiceImpl implements ParticipationService {
         Map<String, Object> variables = new HashMap<>();
         variables.put("greeting", "Merci " + participationForm.firstName() + " !");
         String content = mailService.buildEmailTemplate("email-validation-template", variables);
-        mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
+        //mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
 
         return participationRepository.save(participation);
     }
@@ -114,4 +115,29 @@ public class ParticipationServiceImpl implements ParticipationService {
         }
         return participationRepository.save(participation);
     }
+
+    @Transactional
+    @Override
+    public void validate(Long id) {
+        Participation participation = findById(id);
+        participation.setStatus(Status.VALIDATED);
+        participationRepository.save(participation);
+    }
+
+    @Transactional
+    @Override
+    public void deny(Long id) {
+        Participation participation = findById(id);
+        participation.setStatus(Status.DENIED);
+        participationRepository.save(participation);
+    }
+
+    @Transactional
+    @Override
+    public void ship(Long id) {
+        Participation participation = findById(id);
+        participation.setStatus(Status.SHIPPED);
+        participationRepository.save(participation);
+    }
+
 }

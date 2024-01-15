@@ -60,4 +60,23 @@ public class ParticipationController {
         participationService.addSatisfaction(satisfactionForm);
         return ResponseEntity.ok("Rating added to participation");
     }
+
+    @PatchMapping("/validate")
+    public ResponseEntity<String> validate(@RequestParam Long id) {
+        participationService.validate(id);
+        return ResponseEntity.ok("Participation validated");
+    }
+
+    @PatchMapping("/deny")
+    public ResponseEntity<String> deny(@RequestParam Long id) {
+        participationService.deny(id);
+        return ResponseEntity.ok("Participation denied");
+    }
+
+    @PatchMapping("/ship")
+    public ResponseEntity<String> ship(@RequestParam Long id) {
+        participationService.ship(id);
+        return ResponseEntity.ok("Participation shipped");
+    }
+
 }
