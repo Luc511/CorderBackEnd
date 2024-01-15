@@ -7,6 +7,7 @@ import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ParticipationService {
@@ -18,4 +19,5 @@ public interface ParticipationService {
     void validate(Long id);
     void deny(Long id);
     void ship(Long id);
+    int[] getWeek(LocalDate firstDay);
 }

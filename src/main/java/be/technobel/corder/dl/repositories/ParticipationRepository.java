@@ -6,5 +6,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
+import java.time.LocalDate;
+
 public interface ParticipationRepository extends JpaRepository<Participation, Long> {
+    int countParticipationsByParticipationDate (LocalDate participationDate);
 }

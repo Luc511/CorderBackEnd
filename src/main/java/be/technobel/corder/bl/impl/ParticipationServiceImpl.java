@@ -116,6 +116,8 @@ public class ParticipationServiceImpl implements ParticipationService {
         return participationRepository.save(participation);
     }
 
+    //TODO: fin des tests
+
     @Transactional
     @Override
     public void validate(Long id) {
@@ -138,6 +140,17 @@ public class ParticipationServiceImpl implements ParticipationService {
         Participation participation = findById(id);
         participation.setStatus(Status.SHIPPED);
         participationRepository.save(participation);
+    }
+
+    @Override
+    public int[] getWeek(LocalDate firstDay) {
+        int[] week = new int[7];
+        for (int i = 0; i < 7; i++) {
+            LocalDate date = firstDay.plusDays(i);
+            int count = participationRepository.countParticipationsByParticipationDate(date);
+            week[i] = count;
+        }
+        return week;
     }
 
 }

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -77,6 +78,11 @@ public class ParticipationController {
     public ResponseEntity<String> ship(@RequestParam Long id) {
         participationService.ship(id);
         return ResponseEntity.ok("Participation shipped");
+    }
+
+    @GetMapping("/getWeek")
+    public ResponseEntity<int[]> getWeek(@RequestParam LocalDate firstDay) {
+        return ResponseEntity.ok(participationService.getWeek(firstDay));
     }
 
 }
