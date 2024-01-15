@@ -4,6 +4,7 @@ import be.technobel.corder.bl.ParticipationService;
 import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.pl.models.dtos.ParticipationByIdDTO;
 import be.technobel.corder.pl.models.dtos.ParticipationDTO;
+import be.technobel.corder.pl.models.dtos.StatsDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import jakarta.validation.Valid;
@@ -81,8 +82,12 @@ public class ParticipationController {
     }
 
     @GetMapping("/getWeek")
-    public ResponseEntity<int[]> getWeek(@RequestParam LocalDate firstDay) {
+    public ResponseEntity<Long[]> getWeek(@RequestParam LocalDate firstDay) {
         return ResponseEntity.ok(participationService.getWeek(firstDay));
+    }
+    @GetMapping("/stats")
+    public ResponseEntity<StatsDTO> getAllStats() {
+        return ResponseEntity.ok(participationService.statsDTOBuilder());
     }
 
 }

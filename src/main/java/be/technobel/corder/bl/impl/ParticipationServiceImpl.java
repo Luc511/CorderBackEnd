@@ -8,6 +8,7 @@ import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
 import be.technobel.corder.pl.config.exceptions.PhotoException;
+import be.technobel.corder.pl.models.dtos.StatsDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
 import jakarta.persistence.EntityNotFoundException;
@@ -143,14 +144,102 @@ public class ParticipationServiceImpl implements ParticipationService {
     }
 
     @Override
-    public int[] getWeek(LocalDate firstDay) {
-        int[] week = new int[7];
+    public Long[] getWeek(LocalDate firstDay) {
+        Long[] week = new Long[7];
         for (int i = 0; i < 7; i++) {
             LocalDate date = firstDay.plusDays(i);
-            int count = participationRepository.countParticipationsByParticipationDate(date);
+            Long count = participationRepository.countParticipationsByParticipationDate(date);
             week[i] = count;
         }
         return week;
     }
 
+    @Override
+    public Long countParticipation() {
+        return participationRepository.countAllByIdIsNotNull();
+    }
+
+    @Override
+    public Long[] countParticipationLast5Months() {
+        Long[] count = new Long[5];
+        for (int i = 0; i < count.length; i++) {
+            LocalDate startOfMonth = LocalDate.now().withDayOfMonth(1).minusMonths(i);
+            LocalDate endOfMonth = startOfMonth.plusMonths(1).minusDays(1);
+            count[i] = participationRepository.countAllByParticipationDateBetween(startOfMonth, endOfMonth);
+        }
+        return count;
+    }
+
+    @Override
+    public Map<String, Long> countByProvince() {
+        Map<String, Long> map = new HashMap<>();
+        map.put("Brabant Wallon", participationRepository.countParticipationByAddress_PostCodeBetween(1300, 1499));
+        map.put("Liège", participationRepository.countParticipationByAddress_PostCodeBetween(4000, 4999));
+        map.put("Namur", participationRepository.countParticipationByAddress_PostCodeBetween(5000, 5680));
+        map.put("Hainaut", participationRepository.countParticipationByAddress_PostCodeBetween(6000, 6599) + participationRepository.countParticipationByAddress_PostCodeBetween(7000, 7999));
+        map.put("Luxembourg", participationRepository.countParticipationByAddress_PostCodeBetween(6600, 6999));
+        return map;
+    }
+
+    @Override
+    public Map<String, Long> countByProductType() {
+        Map<String, Long> map = new HashMap<>();
+        map.put("insecticide", participationRepository.countParticipationByProductType("insecticide"));
+        map.put("herbicide", participationRepository.countParticipationByProductType("herbicide"));
+        map.put("fongicide", participationRepository.countParticipationByProductType("fongicide"));
+        List<Participation> others = participationRepository.findAllByProductTypeNotIn(List.of("insecticide", "herbicide", "fongicide"));
+        map.put("autre", (long) others.size());
+        return map;
+    }
+
+    @Override
+    public List<String> otherProductType() {
+        List<Participation> others = participationRepository.findAllByProductTypeNotIn(List.of("insecticide", "herbicide", "fongicide"));
+        return others.stream()
+                .map(Participation::getProductType)
+                .distinct()
+                .toList();
+    }
+
+    @Override
+    public Long[] countNotes() {
+        Long[] count = new Long[3];
+        for (int i = 0; i < count.length; i++) {
+            count[i] = participationRepository.countParticipationBySatisfaction(i+1);
+        }
+        return count;
+    }
+
+    @Override
+    public Map<String, Long> countSatisfactionComments() {
+        Map<String, Long> comments = new HashMap<>();
+        comments.put("C'était trop long", participationRepository.countParticipationBySatisfactionCommentIgnoreCase("C'était trop long"));
+        comments.put("C'était trop court", participationRepository.countParticipationBySatisfactionCommentIgnoreCase("C'était trop court"));
+        comments.put("L'appareil ne fonctionnait pas", participationRepository.countParticipationBySatisfactionCommentIgnoreCase("L'appareil ne fonctionnait pas"));
+        comments.put("Informations pas claires", participationRepository.countParticipationBySatisfactionCommentIgnoreCase("Informations pas claires"));
+        return comments;
+    }
+
+    @Override
+    public List<String> allOtherSatisfactionComments() {
+        return participationRepository
+                .findAllBySatisfactionCommentNotIn(List.of("C'était trop long", "C'était trop court", "L'appareil ne fonctionnait pas", "Informations pas claires"))
+                .stream()
+                .map(Participation::getSatisfactionComment)
+                .toList();
+    }
+
+    @Override
+    public StatsDTO statsDTOBuilder() {
+        return StatsDTO.builder()
+                .totalParticipation(countParticipation())
+                .totalParticipationLast5Months(countParticipationLast5Months())
+                .totalByProvince(countByProvince())
+                .totalByProductType(countByProductType())
+                .otherProductNames(otherProductType())
+                .notes(countNotes())
+                .totalSatisfactionComment(countSatisfactionComments())
+                .otherSatisfactionComments(allOtherSatisfactionComments())
+                .build();
+    }
 }

@@ -2,6 +2,7 @@ package be.technobel.corder.pl.models.dtos;
 
 import be.technobel.corder.dl.models.Address;
 import be.technobel.corder.dl.models.Participation;
+import be.technobel.corder.dl.models.enums.ProductType;
 import be.technobel.corder.dl.models.enums.Status;
 
 public record ParticipationByIdDTO(

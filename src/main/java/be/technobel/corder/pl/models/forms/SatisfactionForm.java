@@ -8,8 +8,8 @@ import jakarta.validation.constraints.NotNull;
 public record SatisfactionForm(
         @NotNull(message = "id cannot be null")
         Long id,
-        @Min(value = 0, message = "minimum 0")
-        @Max(value = 5, message = "maximum 5") //TODO: max 5 or max 3?
+        @Min(value = 1, message = "minimum 0")
+        @Max(value = 3, message = "maximum 3")
         int satisfaction,
         /**
          * satisfaction comment can be null

@@ -2,6 +2,7 @@ package be.technobel.corder.pl.models.forms;
 
 import be.technobel.corder.dl.models.Address;
 import be.technobel.corder.dl.models.Participation;
+import be.technobel.corder.dl.models.enums.ProductType;
 import be.technobel.corder.dl.models.enums.Status;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
