@@ -11,7 +11,9 @@ import be.technobel.corder.pl.config.exceptions.PhotoException;
 import be.technobel.corder.pl.models.dtos.StatsDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
+import com.speedment.jpastreamer.application.JPAStreamer;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,9 +30,13 @@ public class ParticipationServiceImpl implements ParticipationService {
     private final ParticipationRepository participationRepository;
     private final MailService mailService;
 
-    public ParticipationServiceImpl(ParticipationRepository participationRepository, MailService mailService) {
+    private final JPAStreamer jpaStreamer;
+
+    @Autowired
+    public ParticipationServiceImpl(ParticipationRepository participationRepository, MailService mailService, JPAStreamer jpaStreamer) {
         this.participationRepository = participationRepository;
         this.mailService = mailService;
+        this.jpaStreamer = jpaStreamer;
     }
 
     private void isUniqueParticipant(Participation participation) {

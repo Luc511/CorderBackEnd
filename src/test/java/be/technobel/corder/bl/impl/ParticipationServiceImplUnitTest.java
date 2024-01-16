@@ -9,6 +9,7 @@ import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
+import com.speedment.jpastreamer.application.JPAStreamer;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +39,13 @@ public class ParticipationServiceImplUnitTest {
     ParticipationRepository participationRepository;
     ParticipationServiceImpl participationService;
     MailServiceImpl mailService;
+    JPAStreamer jpaStreamer;
 
     @BeforeEach
     public void setUp() {
         participationRepository = mock(ParticipationRepository.class);
         mailService = mock(MailServiceImpl.class);
-        participationService = new ParticipationServiceImpl(participationRepository, mailService);
+        participationService = new ParticipationServiceImpl(participationRepository, mailService, jpaStreamer);
     }
 
     @Test

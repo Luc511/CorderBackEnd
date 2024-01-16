@@ -18,4 +18,5 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     Long countParticipationBySatisfaction(int satisfaction);
     Long countParticipationBySatisfactionCommentIgnoreCase(String satisfactionComment);
     List<Participation> findAllBySatisfactionCommentNotIn(Collection<String> satisfactionComment);
+
 }
