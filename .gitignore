@@ -51,3 +51,4 @@ log/
 *.log
 *.pid
 *.gen
+.sapient

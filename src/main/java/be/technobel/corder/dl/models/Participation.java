@@ -1,5 +1,6 @@
 package be.technobel.corder.dl.models;
 
+import be.technobel.corder.dl.models.enums.ProductType;
 import be.technobel.corder.dl.models.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
