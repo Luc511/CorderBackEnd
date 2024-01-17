@@ -42,3 +42,4 @@ services:
       - SMTP_PASSWORD=570e8bf1b9ab8a
       - SMTP_PORT=25
       - SMTP_USERNAME=16f4841f49d2f9
+      - DATA_INIT=false

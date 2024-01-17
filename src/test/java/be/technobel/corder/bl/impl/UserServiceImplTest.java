@@ -118,7 +118,7 @@ class UserServiceImplTest {
     }
 
     /**
-     * Test the changePassword method under the condition that the currentPassword is not correct.
+     * Test the changePassword method under the condition that the oldPassword is not correct.
      * InvalidPasswordException should be thrown.
      */
     @Test
@@ -138,7 +138,7 @@ class UserServiceImplTest {
     }
 
     /**
-     * Test the changePassword method under the condition that the currentPassword is correct.
+     * Test the changePassword method under the condition that the oldPassword is correct.
      * The password should be updated in the user repository.
      */
     @Test

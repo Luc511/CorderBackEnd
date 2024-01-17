@@ -2,6 +2,8 @@ package be.technobel.corder.bl;
 
 import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.dl.models.enums.Status;
+import be.technobel.corder.pl.models.dtos.DashboardDTO;
+import be.technobel.corder.pl.models.dtos.ParticipationDTO;
 import be.technobel.corder.pl.models.dtos.StatsDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
@@ -22,6 +24,7 @@ public interface ParticipationService {
     void deny(Long id);
     void ship(Long id);
     Long[] getWeek(LocalDate firstDay);
+    Map<String,Long> getWeekWithDays();
     Long countParticipation();
     Long[] countParticipationLast5Months();
     Map<String, Long> countByProvince();
@@ -31,5 +34,8 @@ public interface ParticipationService {
     Map<String, Long> countSatisfactionComments();
     List<String> allOtherSatisfactionComments();
     StatsDTO statsDTOBuilder();
-
+    Long[] last3Pending();
+    Long[] last3Validated();
+    DashboardDTO dashboardDTOBuilder();
+    Participation findByEmail(String email);
 }

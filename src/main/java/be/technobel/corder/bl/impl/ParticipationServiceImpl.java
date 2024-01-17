@@ -8,6 +8,7 @@ import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.dl.repositories.ParticipationRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateParticipationException;
 import be.technobel.corder.pl.config.exceptions.PhotoException;
+import be.technobel.corder.pl.models.dtos.DashboardDTO;
 import be.technobel.corder.pl.models.dtos.StatsDTO;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
 import be.technobel.corder.pl.models.forms.SatisfactionForm;
@@ -17,8 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -75,10 +79,10 @@ public class ParticipationServiceImpl implements ParticipationService {
         participation.setParticipationDate(LocalDate.now());
 
         //MAIL
-        Map<String, Object> variables = new HashMap<>();
-        variables.put("greeting", "Merci " + participationForm.firstName() + " !");
-        String content = mailService.buildEmailTemplate("email-validation-template", variables);
-        mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
+//        Map<String, Object> variables = new HashMap<>();
+//        variables.put("greeting", "Merci " + participationForm.firstName() + " !");
+//        String content = mailService.buildEmailTemplate("email-validation-template", variables);
+//        mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
 
         return participationRepository.save(participation);
     }
@@ -124,6 +128,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     public void validate(Long id) {
         Participation participation = findById(id);
         participation.setStatus(Status.VALIDATED);
+        participation.setStatusUpdateDate(LocalDateTime.now());
         participationRepository.save(participation);
     }
 
@@ -132,6 +137,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     public void deny(Long id) {
         Participation participation = findById(id);
         participation.setStatus(Status.DENIED);
+        participation.setStatusUpdateDate(LocalDateTime.now());
         participationRepository.save(participation);
     }
 
@@ -140,19 +146,34 @@ public class ParticipationServiceImpl implements ParticipationService {
     public void ship(Long id) {
         Participation participation = findById(id);
         participation.setStatus(Status.SHIPPED);
+        participation.setStatusUpdateDate(LocalDateTime.now());
         participationRepository.save(participation);
     }
 
+    //TODO: il manque des participations ??
     @Override
     public Long[] getWeek(LocalDate firstDay) {
         Long[] week = new Long[7];
         for (int i = 0; i < 7; i++) {
-            LocalDate date = firstDay.plusDays(i);
+            LocalDate date = firstDay.minusDays(i);
             Long count = participationRepository.countParticipationsByParticipationDate(date);
             week[i] = count;
         }
         return week;
     }
+
+    @Override
+    public Map<String, Long> getWeekWithDays() {
+        LocalDate start = LocalDate.now().with(java.time.temporal.TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
+        Map<String, Long> map = new LinkedHashMap<>();
+        for (int i = 0; i <= 6; i++) {
+            LocalDate currentDate = start.plusDays(i);
+            Long count = participationRepository.countParticipationsByParticipationDate(currentDate);
+            map.put(currentDate.getDayOfWeek().toString(), count);
+        }
+        return map;
+    }
+
 
     @Override
     public Long countParticipation() {
@@ -172,7 +193,7 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     public Map<String, Long> countByProvince() {
-        Map<String, Long> map = new HashMap<>();
+        Map<String, Long> map = new LinkedHashMap<>();
         map.put("Brabant Wallon", participationRepository.countParticipationByAddress_PostCodeBetween(1300, 1499));
         map.put("Liège", participationRepository.countParticipationByAddress_PostCodeBetween(4000, 4999));
         map.put("Namur", participationRepository.countParticipationByAddress_PostCodeBetween(5000, 5680));
@@ -183,18 +204,18 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     public Map<String, Long> countByProductType() {
-        Map<String, Long> map = new HashMap<>();
-        map.put("insecticide", participationRepository.countParticipationByProductType("insecticide"));
-        map.put("herbicide", participationRepository.countParticipationByProductType("herbicide"));
-        map.put("fongicide", participationRepository.countParticipationByProductType("fongicide"));
-        List<Participation> others = participationRepository.findAllByProductTypeNotIn(List.of("insecticide", "herbicide", "fongicide"));
+        Map<String, Long> map = new LinkedHashMap<>();
+        map.put("insecticide", participationRepository.countParticipationByProductType("Insecticide"));
+        map.put("herbicide", participationRepository.countParticipationByProductType("Herbicide"));
+        map.put("fongicide", participationRepository.countParticipationByProductType("Fongicide"));
+        List<Participation> others = participationRepository.findAllByProductTypeNotIn(List.of("Insecticide", "Herbicide", "Fongicide"));
         map.put("autre", (long) others.size());
         return map;
     }
 
     @Override
     public List<String> otherProductType() {
-        List<Participation> others = participationRepository.findAllByProductTypeNotIn(List.of("insecticide", "herbicide", "fongicide"));
+        List<Participation> others = participationRepository.findAllByProductTypeNotIn(List.of("Insecticide", "Herbicide", "Fongicide"));
         return others.stream()
                 .map(Participation::getProductType)
                 .distinct()
@@ -212,7 +233,7 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     @Override
     public Map<String, Long> countSatisfactionComments() {
-        Map<String, Long> comments = new HashMap<>();
+        Map<String, Long> comments = new LinkedHashMap<>();
         comments.put("C'était trop long", participationRepository.countParticipationBySatisfactionCommentIgnoreCase("C'était trop long"));
         comments.put("C'était trop court", participationRepository.countParticipationBySatisfactionCommentIgnoreCase("C'était trop court"));
         comments.put("L'appareil ne fonctionnait pas", participationRepository.countParticipationBySatisfactionCommentIgnoreCase("L'appareil ne fonctionnait pas"));
@@ -232,14 +253,45 @@ public class ParticipationServiceImpl implements ParticipationService {
     @Override
     public StatsDTO statsDTOBuilder() {
         return StatsDTO.builder()
-                .totalParticipation(countParticipation())
-                .totalParticipationLast5Months(countParticipationLast5Months())
-                .totalByProvince(countByProvince())
-                .totalByProductType(countByProductType())
-                .otherProductNames(otherProductType())
-                .notes(countNotes())
-                .totalSatisfactionComment(countSatisfactionComments())
-                .otherSatisfactionComments(allOtherSatisfactionComments())
+                .countParticipants(countParticipation())
+                .countParticipantsEachLast5Months(countParticipationLast5Months())
+                .countByProvince(countByProvince())
+                .productsUsed(countByProductType())
+                .otherProductsUsed(otherProductType())
+                .countNotes(countNotes())
+                .countSatisfactionComments(countSatisfactionComments())
+                .allOthersSatisfactionComment(allOtherSatisfactionComments())
                 .build();
+    }
+
+    @Override
+    public Long[] last3Pending() {
+        return participationRepository.findTop3ByStatusOrderByStatusUpdateDateDesc(Status.PENDING)
+                .stream()
+                .map(Participation::getId)
+                .toArray(Long[]::new);
+    }
+
+    @Override
+    public Long[] last3Validated() {
+        return participationRepository.findTop3ByStatusOrderByStatusUpdateDateDesc(Status.VALIDATED)
+                .stream()
+                .map(Participation::getId)
+                .toArray(Long[]::new);
+    }
+
+    @Override
+    public DashboardDTO dashboardDTOBuilder() {
+        return DashboardDTO.builder()
+                .countParticipants(countParticipation())
+                .days(getWeekWithDays())
+                .lastThreePending(last3Pending())
+                .lastThreeValidated(last3Validated())
+                .build();
+    }
+
+    @Override
+    public Participation findByEmail(String email) {
+        return participationRepository.findByEmail(email);
     }
 }

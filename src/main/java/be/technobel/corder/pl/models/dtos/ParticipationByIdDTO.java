@@ -7,10 +7,10 @@ import be.technobel.corder.dl.models.enums.Status;
 
 public record ParticipationByIdDTO(
         Long id,
-        String firstName,
-        String lastName,
-        String email,
-        Address address,
+        String participantFirstName,
+        String participantLastName,
+        String participantEmail,
+        AddressDTO participantAddress,
         Status status,
         String productType,
         boolean acceptNewsLetter,
@@ -22,7 +22,7 @@ public record ParticipationByIdDTO(
                 participation.getFirstName(),
                 participation.getLastName(),
                 participation.getEmail(),
-                participation.getAddress(),
+                AddressDTO.fromEntity(participation),
                 participation.getStatus(),
                 participation.getProductType(),
                 participation.isAcceptNewsletter(),

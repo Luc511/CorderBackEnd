@@ -2,17 +2,16 @@ package be.technobel.corder.pl.models.dtos;
 
 import be.technobel.corder.dl.models.Address;
 import be.technobel.corder.dl.models.Participation;
-import be.technobel.corder.dl.models.enums.ProductType;
 import be.technobel.corder.dl.models.enums.Status;
 
 import java.time.LocalDate;
 
 public record ParticipationDTO(
         Long id,
-        String lastName,
-        String firstName,
+        String participantLastName,
+        String participantFirstName,
         LocalDate participationDate,
-        Address address,
+        AddressDTO participantAddress,
         String productType,
         Status status
 ) {
@@ -22,7 +21,7 @@ public record ParticipationDTO(
                 participation.getLastName(),
                 participation.getFirstName(),
                 participation.getParticipationDate(),
-                participation.getAddress(),
+                AddressDTO.fromEntity(participation),
                 participation.getProductType(),
                 participation.getStatus()
         );
