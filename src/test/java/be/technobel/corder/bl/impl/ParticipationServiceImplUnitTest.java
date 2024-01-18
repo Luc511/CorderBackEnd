@@ -18,97 +18,147 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Unit tests for the ParticipationServiceImpl's 'create' method.
+ * Unit tests for ParticipationServiceImpl.
  */
 @SpringBootTest
 public class ParticipationServiceImplUnitTest {
 
+    @Mock
     ParticipationRepository participationRepository;
+    @InjectMocks
     ParticipationServiceImpl participationService;
+    @Mock
     MailServiceImpl mailService;
+
+    Participation participation;
+    ParticipationForm participationForm;
+    Address address;
 
     @BeforeEach
     public void setUp() {
-        participationRepository = mock(ParticipationRepository.class);
-        mailService = mock(MailServiceImpl.class);
-        participationService = new ParticipationServiceImpl(participationRepository, mailService);
+        address = new Address(99L, "rue du paradis", "ciel", 5432);
+        participation = new Participation(
+                99L,
+                LocalDate.now(),
+                "Alice",
+                "Smith",
+                "alicesmith@gmail.com",
+                address,
+                Status.PENDING,
+                null,
+                null,
+                null,
+                null,
+                null,
+                0,
+                null,
+                true,
+                true
+                );
+        participationForm = new ParticipationForm(
+                participation.getFirstName(),
+                participation.getLastName(),
+                participation.getEmail(),
+                participation.getStatus(),
+                participation.getProductType(),
+                participation.getAddress().getStreet(),
+                participation.getAddress().getCity(),
+                participation.getAddress().getPostCode(),
+                participation.isAcceptNewsletter(),
+                participation.isAcceptExposure()
+        );
+
     }
 
     @Test
     void testCreate() {
+        when(participationRepository.save(any(Participation.class))).thenReturn(participation);
 
-        ParticipationForm form = new ParticipationForm(
-                "Alice",
-                "Smith",
-                "email@domain.com",
-                Status.PENDING,
-                "product",
-                "street",
-                "city",
-                10000,
-                true,
-                true
-        );
-        when(participationRepository.save(any())).thenReturn(form.toEntity());
-
-        Participation result = participationService.create(form);
+        Participation result = participationService.create(participationForm);
 
         // assertions here
-        assertEquals(form.email(), result.getEmail());
+        assertEquals(participation.getEmail(), result.getEmail());
+        verify(participationRepository, times(1)).save(any(Participation.class));
+    }
+    @Test
+    void testCreateDuplicateParticipantEmail() {
+        when(participationRepository.findAll()).thenReturn(List.of(participation));
+
+        Exception exception = assertThrows(DuplicateParticipationException.class, () -> {
+            participationService.create(participationForm);
+        });
+
+        String expected = "Ce participant a déjà joué avec cet email !";
+        String actual = exception.getMessage();
+
+        assertTrue(actual.contains(expected));
     }
 
     @Test
-    void testDuplicateParticipantEmail() {
-        ParticipationForm form = new ParticipationForm(
-                "Alice",
-                "Smith",
-                "email@domain.com",
-                Status.PENDING,
-                "product",
-                "street",
-                "city",
-                10000,
-                true,
-                true
-        );
-        when(participationRepository.findAll()).thenReturn(List.of(form.toEntity()));
+    void testCreateDuplicateParticipantAddress() {
+        participation.setEmail("alicesmith2@gmail.com");
+        when(participationRepository.findAll()).thenReturn(List.of(participation));
 
-        assertThrows(DuplicateParticipationException.class, () -> {
-            participationService.create(form);
+        Exception exception = assertThrows(DuplicateParticipationException.class, () -> {
+            participationService.create(participationForm);
         });
+
+        String expected = "Ce foyer a déjà une participation !";
+        String actual = exception.getMessage();
+
+        assertTrue(actual.contains(expected));
     }
-
     @Test
-    void testDuplicateParticipantAddress() {
-        ParticipationForm form = new ParticipationForm(
-                "Alice",
-                "Smith",
-                "secondEmail@domain.com",
-                Status.PENDING,
-                "product",
-                "street",
-                "city",
-                10000,
-                true,
-                true
-        );
-        when(participationRepository.findAll()).thenReturn(List.of(form.toEntity()));
+    void testCreateDuplicateParticipantAddressWithSpaces() {
+        participation.setEmail("alicesmith2@gmail.com");
+        address.setStreet(" " + address.getStreet() + " ");
+        address.setCity(" " + address.getCity() + " ");
 
-        assertThrows(DuplicateParticipationException.class, () -> {
-            participationService.create(form);
+        when(participationRepository.findAll()).thenReturn(List.of(participation));
+
+        Exception exception = assertThrows(DuplicateParticipationException.class, () -> {
+            participationService.create(participationForm);
         });
+
+        String expected = "Ce foyer a déjà une participation !";
+        String actual = exception.getMessage();
+
+        assertTrue(actual.contains(expected));
+    }
+    @Test
+    void testCreateDuplicateParticipantAddressWithUnderscores() {
+        participation.setEmail("alicesmith2@gmail.com");
+
+        address.setStreet("_" + address.getStreet() + "?");
+        address.setCity("°" + address.getCity() + ")");
+
+        when(participationRepository.findAll()).thenReturn(List.of(participation));
+
+        Exception exception = assertThrows(DuplicateParticipationException.class, () -> {
+            participationService.create(participationForm);
+        });
+
+        String expected = "Ce foyer a déjà une participation !";
+        String actual = exception.getMessage();
+
+        assertTrue(actual.contains(expected));
     }
 
     @Test
@@ -118,75 +168,60 @@ public class ParticipationServiceImplUnitTest {
         List<Participation> expected = Arrays.asList(p1, p2);
         when(participationRepository.findAll()).thenReturn(expected);
 
-        //List<Participation> result = participationService.findAll();
-
-        //assertEquals(expected, result);
+        List<Participation> result = participationService.findAll();
+        assertEquals(expected, result);
     }
 
     @Test
     public void findById_existingId_shouldReturnParticipation() {
-        // Given
-        Long id = 1L;
-        Participation expectedParticipation = new Participation();
-        expectedParticipation.setId(id);
-        when(participationRepository.findById(id)).thenReturn(Optional.of(expectedParticipation));
 
-        // When
-        Participation actualParticipation = participationService.findById(id);
+        when(participationRepository.findById(participation.getId())).thenReturn(Optional.of(participation));
 
-        // Then
-        assertTrue(expectedParticipation == actualParticipation);
+        Participation actualParticipation = participationService.findById(participation.getId());
+
+        assertSame(participation, actualParticipation);
     }
 
     @Test
     void findById_nonExistingId_shouldThrowException() {
-        // Given
-        Long id = 2L;
-        when(participationRepository.findById(id)).thenReturn(Optional.empty());
+        when(participationRepository.findById(participation.getId())).thenReturn(Optional.empty());
 
-        // When & Then
-        assertThrows(EntityNotFoundException.class, () -> participationService.findById(id));
+        Exception exception = assertThrows(EntityNotFoundException.class, () -> participationService.findById(participation.getId()));
+
+        assertEquals(exception.getMessage(), "Participation avec l'id: " + participation.getId() + " introuvable");
     }
 
     @Test
     public void addPhotoTest() throws IOException {
-        Participation participation = new Participation();
-        MultipartFile file = Mockito.mock(MultipartFile.class);
-        byte[] data = "example".getBytes();
-        when(file.getBytes()).thenReturn(data);
-        when(participationRepository.findById(anyLong())).thenReturn(Optional.of(participation));
-        when(participationRepository.save(participation)).thenReturn(participation);
+        byte[] mockBytes = {1, 0, 1};
+        MultipartFile photo = new MockMultipartFile("photo", "mock.png", MediaType.IMAGE_PNG_VALUE, mockBytes);
 
-        Participation updatedParticipation = participationService.addPhoto(file, 1L);
+        Participation updatedParticipation = participation;
+        updatedParticipation.setBlob(mockBytes);
 
-        assertEquals(data, updatedParticipation.getBlob(), "Blob must have the same data");
-        assertEquals(file.getOriginalFilename(), updatedParticipation.getPictureName(), "PictureName must be same");
-        assertEquals(file.getContentType(), updatedParticipation.getPictureType(), "PictureType must be same");
+        when(participationRepository.findById(anyLong())).thenReturn(java.util.Optional.of(participation));
+        when(participationRepository.save(any(Participation.class))).thenReturn(updatedParticipation);
+
+        // When
+        Participation returnedParticipation = participationService.addPhoto(photo, participation.getId());
+
+        // Then
+        verify(participationRepository, times(1)).findById(participation.getId());
+        verify(participationRepository, times(1)).save(participation);
+
+        assertNotNull(returnedParticipation.getBlob());
+        assertArrayEquals(mockBytes, returnedParticipation.getBlob());
     }
 
     @Test
     public void addPhotoTest_EntityNotFound() {
         MultipartFile file = Mockito.mock(MultipartFile.class);
-        when(participationRepository.findById(anyLong())).thenThrow(new EntityNotFoundException("Participation avec l'id: 1 introuvable"));
-
-        try {
-            participationService.addPhoto(file, 1L);
-        } catch (EntityNotFoundException e) {
-            assertEquals("Participation avec l'id: 1 introuvable", e.getMessage());
-        }
-    }
-
-    @Test
-    public void addPhotoTest_PhotoException() throws IOException {
-        MultipartFile file = Mockito.mock(MultipartFile.class);
-        when(file.getBytes()).thenThrow(new IOException());
-        Participation participation = new Participation();
         when(participationRepository.findById(anyLong())).thenReturn(Optional.of(participation));
 
         try {
-            participationService.addPhoto(file, 1L);
-        } catch (RuntimeException e) {
-            assertEquals("Impossible d'ajouter une photo au participant avec l'id:  1", e.getMessage());
+            participationService.addPhoto(file, participation.getId());
+        } catch (EntityNotFoundException e) {
+            assertEquals("Participation avec l'id: 1 introuvable", e.getMessage());
         }
     }
 
@@ -205,6 +240,114 @@ public class ParticipationServiceImplUnitTest {
         //Then
         assertEquals(result.getSatisfaction(), mockForm.satisfaction());
         verify(participationRepository, times(1)).save(any(Participation.class));
+    }
+
+    @Test
+    public void testValidateWhenIdExists(){
+        // Given
+        var expectedParticipation = new Participation();
+        expectedParticipation.setId(15L);
+        expectedParticipation.setStatus(Status.PENDING);
+        Mockito.when(participationRepository.findById(15L)).thenReturn(java.util.Optional.of(expectedParticipation));
+
+        // When
+        participationService.validate(15L);
+
+        // Then
+        verify(participationRepository).findById(15L);
+        assertThat(expectedParticipation.getStatus()).isEqualTo(Status.VALIDATED);
+        assertThat(expectedParticipation.getStatusUpdateDate()).isBeforeOrEqualTo(LocalDateTime.now());
+    }
+
+    @Test
+    public void testValidateWhenIdDoesNotExists(){
+        // Given
+        when(participationRepository.findById(999L)).thenThrow(new EntityNotFoundException("Participation with id: 999 does not exist"));
+
+        // Then
+        try {
+            // When
+            participationService.validate(999L);
+        } catch (EntityNotFoundException exception) {
+            // Assert
+            assertThat(exception).hasMessage("Participation with id: 999 does not exist");
+        }
+    }
+
+    @Test
+    public void testDenyWhenIdExists(){
+        // Given
+        var expectedParticipation = new Participation();
+        expectedParticipation.setId(15L);
+        expectedParticipation.setStatus(Status.PENDING);
+        Mockito.when(participationRepository.findById(15L)).thenReturn(java.util.Optional.of(expectedParticipation));
+
+        // When
+        participationService.deny(15L);
+
+        // Then
+        verify(participationRepository).findById(15L);
+        assertThat(expectedParticipation.getStatus()).isEqualTo(Status.DENIED);
+        assertThat(expectedParticipation.getStatusUpdateDate()).isBeforeOrEqualTo(LocalDateTime.now());
+    }
+
+    @Test
+    public void testDenyWhenIdDoesNotExists(){
+        // Given
+        when(participationRepository.findById(999L)).thenThrow(new EntityNotFoundException("Participation with id: 999 does not exist"));
+
+        // Then
+        try {
+            // When
+            participationService.deny(999L);
+        } catch (EntityNotFoundException exception) {
+            // Assert
+            assertThat(exception).hasMessage("Participation with id: 999 does not exist");
+        }
+    }
+
+
+
+    /**
+     * Test for case when every day in week has a constant number of participants
+     */
+    @Test
+    void testGetWeekConstantParticipants() {
+        ParticipationServiceImpl participationService = new ParticipationServiceImpl(participationRepository, null);
+        long constantParticipants = 5L;
+        Long[] expectedWeek = new Long[]{constantParticipants, constantParticipants, constantParticipants, constantParticipants, constantParticipants, constantParticipants, constantParticipants};
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 4))).thenReturn(constantParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 3))).thenReturn(constantParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 2))).thenReturn(constantParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 1))).thenReturn(constantParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 31))).thenReturn(constantParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 30))).thenReturn(constantParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 29))).thenReturn(constantParticipants);
+
+        Long[] resultWeek = participationService.getWeek(LocalDate.of(2023, Month.APRIL, 4));
+
+        assertArrayEquals(resultWeek, expectedWeek);
+    }
+
+    /**
+     * Test for case when every day in week doesn't have any participants
+     */
+    @Test
+    void testGetWeekWithNoParticipants() {
+        ParticipationServiceImpl participationService = new ParticipationServiceImpl(participationRepository, null);
+        long zeroParticipants = 0L;
+        Long[] expectedWeek = new Long[]{zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants};
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 4))).thenReturn(zeroParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 3))).thenReturn(zeroParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 2))).thenReturn(zeroParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 1))).thenReturn(zeroParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 31))).thenReturn(zeroParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 30))).thenReturn(zeroParticipants);
+        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 29))).thenReturn(zeroParticipants);
+
+        Long[] resultWeek = participationService.getWeek(LocalDate.of(2023, Month.APRIL, 4));
+
+        assertArrayEquals(resultWeek, expectedWeek);
     }
 
 }

@@ -62,7 +62,9 @@ public class ParticipationServiceImpl implements ParticipationService {
 
     private String formatAddress(Participation participation) {
         Address Address = participation.getAddress();
-        return (Address.getStreet() + Address.getCity() + Address.getPostCode()).trim().toLowerCase();
+        return (Address.getStreet().trim() + Address.getCity().trim() + Address.getPostCode())
+                .toLowerCase()
+                .replaceAll("[^a-zA-Z0-9]", "");
     }
 
     private String formatEmail(Participation participation) {
@@ -79,10 +81,10 @@ public class ParticipationServiceImpl implements ParticipationService {
         participation.setParticipationDate(LocalDate.now());
 
         //MAIL
-//        Map<String, Object> variables = new HashMap<>();
-//        variables.put("greeting", "Merci " + participationForm.firstName() + " !");
-//        String content = mailService.buildEmailTemplate("email-validation-template", variables);
-//        mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("greeting", "Merci " + participationForm.firstName() + " !");
+        String content = mailService.buildEmailTemplate("email-validation-template", variables);
+        mailService.sendMail(participationForm.email(), "Merci pour votre participation !", content, true);
 
         return participationRepository.save(participation);
     }
@@ -150,7 +152,6 @@ public class ParticipationServiceImpl implements ParticipationService {
         participationRepository.save(participation);
     }
 
-    //TODO: il manque des participations ??
     @Override
     public Long[] getWeek(LocalDate firstDay) {
         Long[] week = new Long[7];
