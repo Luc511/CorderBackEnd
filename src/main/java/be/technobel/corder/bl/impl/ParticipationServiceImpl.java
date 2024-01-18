@@ -101,26 +101,26 @@ public class ParticipationServiceImpl implements ParticipationService {
     }
 
     @Override
-    public Participation addPhoto(MultipartFile photo, Long id) {
+    public void addPhoto(MultipartFile photo, Long id) {
         try {
             Participation entity = findById(id);
             entity.setBlob(photo.getBytes());
             entity.setPictureName(photo.getOriginalFilename());
             entity.setPictureType(photo.getContentType());
-            return participationRepository.save(entity);
+            participationRepository.save(entity);
         } catch (IOException e) {
             throw new PhotoException("Impossible d'ajouter une photo au participant avec l'id:  " + id);
         }
     }
 
     @Override
-    public Participation addSatisfaction(SatisfactionForm satisfactionForm) {
+    public void addSatisfaction(SatisfactionForm satisfactionForm) {
         Participation participation = findById(satisfactionForm.id());
         participation.setSatisfaction(satisfactionForm.satisfaction());
         if (satisfactionForm.satisfactionComment() != null) {
             participation.setSatisfactionComment(satisfactionForm.satisfactionComment());
         }
-        return participationRepository.save(participation);
+        participationRepository.save(participation);
     }
 
     //TODO: fin des tests
@@ -295,4 +295,6 @@ public class ParticipationServiceImpl implements ParticipationService {
     public Participation findByEmail(String email) {
         return participationRepository.findByEmail(email);
     }
+
+
 }

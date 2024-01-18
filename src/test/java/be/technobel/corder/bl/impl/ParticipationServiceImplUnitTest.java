@@ -27,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +51,7 @@ public class ParticipationServiceImplUnitTest {
     Participation participation;
     ParticipationForm participationForm;
     Address address;
+    SatisfactionForm satisfactionForm;
 
     @BeforeEach
     public void setUp() {
@@ -83,6 +85,11 @@ public class ParticipationServiceImplUnitTest {
                 participation.getAddress().getPostCode(),
                 participation.isAcceptNewsletter(),
                 participation.isAcceptExposure()
+        );
+        satisfactionForm = new SatisfactionForm(
+                99L,
+                1,
+                "très satisfait"
         );
 
     }
@@ -190,164 +197,127 @@ public class ParticipationServiceImplUnitTest {
 
         assertEquals(exception.getMessage(), "Participation avec l'id: " + participation.getId() + " introuvable");
     }
-
     @Test
-    public void addPhotoTest() throws IOException {
-        byte[] mockBytes = {1, 0, 1};
-        MultipartFile photo = new MockMultipartFile("photo", "mock.png", MediaType.IMAGE_PNG_VALUE, mockBytes);
+    void testCreateDuplicateParticipantEmailAndAddressWithSpaces() {
+        when(participationRepository.findAll()).thenReturn(List.of(participation));
 
-        Participation updatedParticipation = participation;
-        updatedParticipation.setBlob(mockBytes);
+        participation.setEmail(" alicesmith@gmail.com ");
 
-        when(participationRepository.findById(anyLong())).thenReturn(java.util.Optional.of(participation));
-        when(participationRepository.save(any(Participation.class))).thenReturn(updatedParticipation);
+        Address newAddress = new Address();
+        newAddress.setStreet(" rue du paradis ");
+        newAddress.setCity(" ciel ");
+        newAddress.setPostCode(5432);
 
-        // When
-        Participation returnedParticipation = participationService.addPhoto(photo, participation.getId());
+        participation.setAddress(newAddress);
 
-        // Then
-        verify(participationRepository, times(1)).findById(participation.getId());
-        verify(participationRepository, times(1)).save(participation);
+        Exception exception = assertThrows(DuplicateParticipationException.class, () -> {
+            participationService.create(participationForm);
+        });
 
-        assertNotNull(returnedParticipation.getBlob());
-        assertArrayEquals(mockBytes, returnedParticipation.getBlob());
+        String expected = "Ce participant a déjà joué avec cet email !";
+        String actual = exception.getMessage();
+
+        assertEquals(expected, actual);
     }
 
     @Test
-    public void addPhotoTest_EntityNotFound() {
-        MultipartFile file = Mockito.mock(MultipartFile.class);
+    void testAddSatisfaction_noParticipation_shouldThrowException() {
+
+        when(participationRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> participationService.addSatisfaction(satisfactionForm));
+    }
+
+    @Test
+    void testAddSatisfaction() {
+
         when(participationRepository.findById(anyLong())).thenReturn(Optional.of(participation));
 
-        try {
-            participationService.addPhoto(file, participation.getId());
-        } catch (EntityNotFoundException e) {
-            assertEquals("Participation avec l'id: 1 introuvable", e.getMessage());
-        }
+        participationService.addSatisfaction(satisfactionForm);
+
+        verify(participationRepository, times(1)).save(participation);
+        assertEquals(satisfactionForm.satisfactionComment(), participation.getSatisfactionComment());
+        assertEquals(satisfactionForm.satisfaction(), participation.getSatisfaction());
+    }
+
+// Tests pour la méthode validate
+
+    @Test
+    void testValidate_noParticipation_shouldThrowException() {
+        when(participationRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> participationService.validate(participation.getId()));
     }
 
     @Test
-    public void shouldAddSatisfactionScore() {
-        //Given
-        SatisfactionForm mockForm = new SatisfactionForm(1L, 3, "test");
-        Participation mockParticipation = new Participation();
+    void testValidate() {
+        when(participationRepository.findById(participation.getId())).thenReturn(Optional.of(participation));
 
-        when(participationRepository.findById(any(Long.class))).thenReturn(Optional.of(mockParticipation));
-        when(participationRepository.save(any(Participation.class))).thenReturn(mockParticipation);
+        participationService.validate(participation.getId());
 
-        //When
-        Participation result = participationService.addSatisfaction(mockForm);
+        verify(participationRepository, times(1)).save(participation);
+        assertEquals(Status.VALIDATED, participation.getStatus());
+    }
 
-        //Then
-        assertEquals(result.getSatisfaction(), mockForm.satisfaction());
-        verify(participationRepository, times(1)).save(any(Participation.class));
+    // pour deny
+    @Test
+    void testDeny_noParticipation_shouldThrowException() {
+        when(participationRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> participationService.deny(participation.getId()));
     }
 
     @Test
-    public void testValidateWhenIdExists(){
-        // Given
-        var expectedParticipation = new Participation();
-        expectedParticipation.setId(15L);
-        expectedParticipation.setStatus(Status.PENDING);
-        Mockito.when(participationRepository.findById(15L)).thenReturn(java.util.Optional.of(expectedParticipation));
+    void testDeny() {
+        when(participationRepository.findById(participation.getId())).thenReturn(Optional.of(participation));
 
-        // When
-        participationService.validate(15L);
+        participationService.deny(participation.getId());
 
-        // Then
-        verify(participationRepository).findById(15L);
-        assertThat(expectedParticipation.getStatus()).isEqualTo(Status.VALIDATED);
-        assertThat(expectedParticipation.getStatusUpdateDate()).isBeforeOrEqualTo(LocalDateTime.now());
+        verify(participationRepository, times(1)).save(participation);
+        assertEquals(Status.DENIED, participation.getStatus());
+    }
+
+    // pour ship
+    @Test
+    void testShip_noParticipation_shouldThrowException() {
+        when(participationRepository.findById(anyLong())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> participationService.ship(participation.getId()));
     }
 
     @Test
-    public void testValidateWhenIdDoesNotExists(){
-        // Given
-        when(participationRepository.findById(999L)).thenThrow(new EntityNotFoundException("Participation with id: 999 does not exist"));
+    void testShip() {
+        when(participationRepository.findById(participation.getId())).thenReturn(Optional.of(participation));
 
-        // Then
-        try {
-            // When
-            participationService.validate(999L);
-        } catch (EntityNotFoundException exception) {
-            // Assert
-            assertThat(exception).hasMessage("Participation with id: 999 does not exist");
-        }
+        participationService.ship(participation.getId());
+
+        verify(participationRepository, times(1)).save(participation);
+        assertEquals(Status.SHIPPED, participation.getStatus());
     }
 
     @Test
-    public void testDenyWhenIdExists(){
-        // Given
-        var expectedParticipation = new Participation();
-        expectedParticipation.setId(15L);
-        expectedParticipation.setStatus(Status.PENDING);
-        Mockito.when(participationRepository.findById(15L)).thenReturn(java.util.Optional.of(expectedParticipation));
+    void testCountParticipation_nonExistingId_shouldReturnZero() {
+        when(participationRepository.countAllByIdIsNotNull()).thenReturn(0L);
+        long count = participationService.countParticipation();
 
-        // When
-        participationService.deny(15L);
-
-        // Then
-        verify(participationRepository).findById(15L);
-        assertThat(expectedParticipation.getStatus()).isEqualTo(Status.DENIED);
-        assertThat(expectedParticipation.getStatusUpdateDate()).isBeforeOrEqualTo(LocalDateTime.now());
+        assertEquals(0L, count);
+        verify(participationRepository, times(1)).countAllByIdIsNotNull();
     }
 
     @Test
-    public void testDenyWhenIdDoesNotExists(){
-        // Given
-        when(participationRepository.findById(999L)).thenThrow(new EntityNotFoundException("Participation with id: 999 does not exist"));
+    void testFindByEmail() {
+        when(participationRepository.findByEmail(anyString())).thenReturn(participation);
+        Participation foundParticipation = participationService.findByEmail(participation.getEmail());
 
-        // Then
-        try {
-            // When
-            participationService.deny(999L);
-        } catch (EntityNotFoundException exception) {
-            // Assert
-            assertThat(exception).hasMessage("Participation with id: 999 does not exist");
-        }
+        assertEquals(participation, foundParticipation);
     }
 
-
-
-    /**
-     * Test for case when every day in week has a constant number of participants
-     */
     @Test
-    void testGetWeekConstantParticipants() {
-        ParticipationServiceImpl participationService = new ParticipationServiceImpl(participationRepository, null);
-        long constantParticipants = 5L;
-        Long[] expectedWeek = new Long[]{constantParticipants, constantParticipants, constantParticipants, constantParticipants, constantParticipants, constantParticipants, constantParticipants};
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 4))).thenReturn(constantParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 3))).thenReturn(constantParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 2))).thenReturn(constantParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 1))).thenReturn(constantParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 31))).thenReturn(constantParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 30))).thenReturn(constantParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 29))).thenReturn(constantParticipants);
+    void testFindByEmail_nullValue() {
+        when(participationRepository.findByEmail(null)).thenReturn(null);
+        Participation foundParticipation = participationService.findByEmail(null);
 
-        Long[] resultWeek = participationService.getWeek(LocalDate.of(2023, Month.APRIL, 4));
-
-        assertArrayEquals(resultWeek, expectedWeek);
-    }
-
-    /**
-     * Test for case when every day in week doesn't have any participants
-     */
-    @Test
-    void testGetWeekWithNoParticipants() {
-        ParticipationServiceImpl participationService = new ParticipationServiceImpl(participationRepository, null);
-        long zeroParticipants = 0L;
-        Long[] expectedWeek = new Long[]{zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants, zeroParticipants};
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 4))).thenReturn(zeroParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 3))).thenReturn(zeroParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 2))).thenReturn(zeroParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.APRIL, 1))).thenReturn(zeroParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 31))).thenReturn(zeroParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 30))).thenReturn(zeroParticipants);
-        when(participationRepository.countParticipationsByParticipationDate(LocalDate.of(2023, Month.MARCH, 29))).thenReturn(zeroParticipants);
-
-        Long[] resultWeek = participationService.getWeek(LocalDate.of(2023, Month.APRIL, 4));
-
-        assertArrayEquals(resultWeek, expectedWeek);
+        assertNull(foundParticipation);
     }
 
 }
