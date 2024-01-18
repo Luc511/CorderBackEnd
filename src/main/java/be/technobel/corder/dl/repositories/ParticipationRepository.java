@@ -1,8 +1,11 @@
 package be.technobel.corder.dl.repositories;
 
 import be.technobel.corder.dl.models.Participation;
+import be.technobel.corder.dl.models.enums.Status;
+import be.technobel.corder.pl.models.dtos.ParticipationDTO;
 import jakarta.mail.Part;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -18,4 +21,6 @@ public interface ParticipationRepository extends JpaRepository<Participation, Lo
     Long countParticipationBySatisfaction(int satisfaction);
     Long countParticipationBySatisfactionCommentIgnoreCase(String satisfactionComment);
     List<Participation> findAllBySatisfactionCommentNotIn(Collection<String> satisfactionComment);
+    Collection<Participation> findTop3ByStatusOrderByStatusUpdateDateDesc(Status status);
+    Participation findByEmail(String email);
 }

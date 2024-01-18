@@ -3,6 +3,7 @@ package be.technobel.corder.bl.impl;
 import be.technobel.corder.bl.UserService;
 import be.technobel.corder.dl.models.User;
 import be.technobel.corder.dl.repositories.UserRepository;
+import be.technobel.corder.pl.config.exceptions.DuplicateUserException;
 import be.technobel.corder.pl.config.exceptions.InvalidPasswordException;
 import be.technobel.corder.pl.config.security.JWTProvider;
 import be.technobel.corder.pl.models.dtos.AuthDTO;
@@ -37,7 +38,8 @@ public class UserServiceImpl implements UserService {
     public void register(UserForm form) {
         if(form == null)
             throw new IllegalArgumentException("form peut pas être null");
-
+        if (userRepository.existsByLogin(form.login()))
+            throw new DuplicateUserException("Login already used");
         User entity = new User();
         entity.setLogin(form.login());
         entity.setPassword(passwordEncoder.encode(form.password()));
@@ -69,11 +71,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void changePassword(PasswordChangeForm passwordChangeForm) {
-        String login = passwordChangeForm.login();
-        String currentPassword = passwordChangeForm.currentPassword();
+        String login = passwordChangeForm.user();
+        String currentPassword = passwordChangeForm.oldPassword();
         String newPassword = passwordChangeForm.newPassword();
 
-        Optional<User> optionalUser = userRepository.findByLogin(passwordChangeForm.login());
+        Optional<User> optionalUser = userRepository.findByLogin(passwordChangeForm.user());
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 

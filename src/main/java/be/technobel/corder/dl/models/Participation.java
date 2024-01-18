@@ -1,6 +1,5 @@
 package be.technobel.corder.dl.models;
 
-import be.technobel.corder.dl.models.enums.ProductType;
 import be.technobel.corder.dl.models.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -35,10 +34,11 @@ public class Participation {
     @Enumerated(EnumType.STRING)
     private Status status;
     @Temporal(value = TemporalType.TIMESTAMP)
-    private LocalDateTime validatedDate;
+    private LocalDateTime statusUpdateDate;
     private String pictureName;
     private String pictureType;
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     private byte[] blob;
     private String productType;
     private int satisfaction;

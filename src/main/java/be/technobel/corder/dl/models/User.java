@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name = "user_")
+@Table(name = "user_", uniqueConstraints = @UniqueConstraint(columnNames = "login"))
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
