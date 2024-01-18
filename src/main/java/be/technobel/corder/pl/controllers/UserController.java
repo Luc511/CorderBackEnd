@@ -29,13 +29,11 @@ public class UserController {
     @PostMapping("/register")
     public void register(@RequestBody @Valid UserForm form){
         userService.register(form);
-        //return ResponseEntity.ok("User created");
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/changePassword")
     public void changePassword(@RequestBody @Valid PasswordChangeForm form) {
         userService.changePassword(form);
-        //return ResponseEntity.ok("Password changed successfully");
     }
 }

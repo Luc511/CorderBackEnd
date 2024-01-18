@@ -1,4 +1,4 @@
-package be.technobel.corder.pl.datainit;
+package be.technobel.corder.dl.datainit;
 
 
 import be.technobel.corder.bl.ParticipationService;
@@ -13,7 +13,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
