@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 /**
  * This class is an implementation of the {@link UserDetailsService} interface.
  * It is responsible for loading user details from the UserRepository based on the given username.
- *
+ * <p>
  * The UserDetailsServiceImpl class requires an instance of the UserRepository class
  * to retrieve user details from the underlying data source.
  */

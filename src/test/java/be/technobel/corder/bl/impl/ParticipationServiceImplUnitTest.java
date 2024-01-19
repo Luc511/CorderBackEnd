@@ -18,7 +18,6 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.*;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -60,7 +59,7 @@ public class ParticipationServiceImplUnitTest {
                 null,
                 true,
                 true
-                );
+        );
         participationForm = new ParticipationForm(
                 participation.getFirstName(),
                 participation.getLastName(),
@@ -91,6 +90,7 @@ public class ParticipationServiceImplUnitTest {
         assertEquals(participation.getEmail(), result.getEmail());
         verify(participationRepository, times(1)).save(any(Participation.class));
     }
+
     @Test
     void testCreateDuplicateParticipantEmail() {
         when(participationRepository.findAll()).thenReturn(List.of(participation));
@@ -119,6 +119,7 @@ public class ParticipationServiceImplUnitTest {
 
         assertTrue(actual.contains(expected));
     }
+
     @Test
     void testCreateDuplicateParticipantAddressWithSpaces() {
         participation.setEmail("alicesmith2@gmail.com");
@@ -136,6 +137,7 @@ public class ParticipationServiceImplUnitTest {
 
         assertTrue(actual.contains(expected));
     }
+
     @Test
     void testCreateDuplicateParticipantAddressWithDifferentChars() {
         participation.setEmail("alicesmith2@gmail.com");
@@ -241,6 +243,7 @@ public class ParticipationServiceImplUnitTest {
         verify(participationRepository, times(1)).save(participation);
         assertEquals(Status.DENIED, participation.getStatus());
     }
+
     @Test
     void testShip_noParticipation_shouldThrowException() {
         when(participationRepository.findById(anyLong())).thenReturn(Optional.empty());
@@ -391,6 +394,7 @@ public class ParticipationServiceImplUnitTest {
         verify(participationRepository, times(1)).countParticipationByAddress_PostCodeBetween(7000, 7999);
         verify(participationRepository, times(1)).countParticipationByAddress_PostCodeBetween(6600, 6999);
     }
+
     @Test
     void countByProductType_withParticipations() {
         Map<String, Long> expectedCounts = Map.of(
@@ -451,14 +455,14 @@ public class ParticipationServiceImplUnitTest {
     void countNotes_withParticipations() {
         Long[] expectedCounts = {10L, 20L, 30L};
         for (int i = 0; i < 3; i++) {
-            when(participationRepository.countParticipationBySatisfaction(i+1)).thenReturn(expectedCounts[i]);
+            when(participationRepository.countParticipationBySatisfaction(i + 1)).thenReturn(expectedCounts[i]);
         }
 
         Long[] actualCounts = participationService.countNotes();
 
         assertArrayEquals(expectedCounts, actualCounts);
         for (int i = 0; i < 3; i++) {
-            verify(participationRepository, times(1)).countParticipationBySatisfaction(i+1);
+            verify(participationRepository, times(1)).countParticipationBySatisfaction(i + 1);
         }
     }
 
@@ -466,14 +470,14 @@ public class ParticipationServiceImplUnitTest {
     void countNotes_noParticipations() {
         Long[] expectedCounts = {0L, 0L, 0L};
         for (int i = 0; i < 3; i++) {
-            when(participationRepository.countParticipationBySatisfaction(i+1)).thenReturn(expectedCounts[i]);
+            when(participationRepository.countParticipationBySatisfaction(i + 1)).thenReturn(expectedCounts[i]);
         }
 
         Long[] actualCounts = participationService.countNotes();
 
         assertArrayEquals(expectedCounts, actualCounts);
         for (int i = 0; i < 3; i++) {
-            verify(participationRepository, times(1)).countParticipationBySatisfaction(i+1);
+            verify(participationRepository, times(1)).countParticipationBySatisfaction(i + 1);
         }
     }
 
@@ -615,7 +619,7 @@ public class ParticipationServiceImplUnitTest {
     }
 
     @Test
-    void findByEmail_nonExistingEmail(){
+    void findByEmail_nonExistingEmail() {
         String testEmail = "nonExistingTest@example.com";
         when(participationRepository.findByEmail(testEmail)).thenReturn(null);
 

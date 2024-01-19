@@ -1,35 +1,25 @@
 package be.technobel.corder.bl.impl;
 
-import be.technobel.corder.dl.models.Address;
-import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.dl.models.User;
 import be.technobel.corder.dl.models.enums.Role;
-import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.dl.repositories.UserRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateUserException;
 import be.technobel.corder.pl.config.exceptions.InvalidPasswordException;
-import be.technobel.corder.pl.config.security.JWTProvider;
-import be.technobel.corder.pl.models.dtos.AuthDTO;
-import be.technobel.corder.pl.models.forms.*;
-import org.junit.jupiter.api.Assertions;
+import be.technobel.corder.pl.models.forms.LoginForm;
+import be.technobel.corder.pl.models.forms.PasswordChangeForm;
+import be.technobel.corder.pl.models.forms.UserForm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.time.LocalDate;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 @SpringBootTest
@@ -106,6 +96,7 @@ class UserServiceImplTest {
         verify(userRepository, times(1)).save(user);
 
     }
+
     @Test
     void changePassword_withInvalidPassword() {
         //Arrange

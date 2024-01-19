@@ -24,13 +24,13 @@ public class UserController {
 
     @PreAuthorize("isAnonymous()")
     @PostMapping("/login")
-    public ResponseEntity<AuthDTO> login(@RequestBody @Valid LoginForm form){
+    public ResponseEntity<AuthDTO> login(@RequestBody @Valid LoginForm form) {
         return ResponseEntity.ok(userService.login(form));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/register")
-    public void register(@RequestBody @Valid UserForm form){
+    public void register(@RequestBody @Valid UserForm form) {
         userService.register(form);
     }
 

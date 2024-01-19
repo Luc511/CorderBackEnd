@@ -7,6 +7,8 @@ import be.technobel.corder.pl.models.forms.UserForm;
 
 public interface UserService {
     void register(UserForm form);
+
     AuthDTO login(LoginForm form);
+
     void changePassword(PasswordChangeForm passwordChangeForm);
 }

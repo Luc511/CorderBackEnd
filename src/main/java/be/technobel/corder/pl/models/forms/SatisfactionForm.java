@@ -1,6 +1,5 @@
 package be.technobel.corder.pl.models.forms;
 
-import be.technobel.corder.dl.models.Participation;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;

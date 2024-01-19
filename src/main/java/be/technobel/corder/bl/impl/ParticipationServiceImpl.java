@@ -143,7 +143,7 @@ public class ParticipationServiceImpl implements ParticipationService {
      * Adds a photo to a participation by setting the photo's bytes, original filename, and content type.
      *
      * @param photo The photo to be added.
-     * @param id The ID of the participation to which the photo is added.
+     * @param id    The ID of the participation to which the photo is added.
      * @throws PhotoException If there is an error adding the photo to the participation.
      */
     @Override
@@ -301,7 +301,7 @@ public class ParticipationServiceImpl implements ParticipationService {
      * Counts the number of participations grouped by product type.
      *
      * @return A map where the key is the product type and the value is the count of participations for that product type.
-     *         The keys in the map are 'insecticide', 'herbicide', 'fongicide', and 'autre'.
+     * The keys in the map are 'insecticide', 'herbicide', 'fongicide', and 'autre'.
      */
     @Override
     public Map<String, Long> countByProductType() {
@@ -337,7 +337,7 @@ public class ParticipationServiceImpl implements ParticipationService {
     public Long[] countNotes() {
         Long[] count = new Long[3];
         for (int i = 0; i < count.length; i++) {
-            count[i] = participationRepository.countParticipationBySatisfaction(i+1);
+            count[i] = participationRepository.countParticipationBySatisfaction(i + 1);
         }
         return count;
     }

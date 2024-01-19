@@ -31,6 +31,7 @@ public class ParticipationController {
     public ResponseEntity<ParticipationDTO> createParticipation(@Valid @RequestBody ParticipationForm participationForm) {
         return ResponseEntity.ok(ParticipationDTO.fromEntity(participationService.create(participationForm)));
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/")
     public ResponseEntity<List<ParticipationDTO>> getAllParticipations() {
@@ -40,16 +41,19 @@ public class ParticipationController {
                 .toList();
         return ResponseEntity.ok(participations);
     }
+
     @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/{id}")
     public ResponseEntity<ParticipationByIdDTO> getParticipationById(@PathVariable Long id) {
         Participation participation = participationService.findById(id);
         return ResponseEntity.ok(ParticipationByIdDTO.fromEntity(participation));
     }
+
     @PostMapping("/photo/{id}")
     public void addPhoto(@RequestBody MultipartFile file, @PathVariable Long id) {
         participationService.addPhoto(file, id);
     }
+
     @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/photo")
     public ResponseEntity<?> getPhoto(@RequestParam("id") Long id) {
@@ -89,11 +93,13 @@ public class ParticipationController {
     public ResponseEntity<WeekDTO> getWeek(@RequestParam LocalDate firstDay) {
         return ResponseEntity.ok(WeekDTO.builder().days(participationService.getWeek(firstDay)).build());
     }
+
     @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/stats")
     public ResponseEntity<StatsDTO> getAllStats() {
         return ResponseEntity.ok(participationService.statsDTOBuilder());
     }
+
     @PreAuthorize("hasRole('ADMIN') || hasRole('LOGISTIC')")
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardDTO> getDashboard() {
