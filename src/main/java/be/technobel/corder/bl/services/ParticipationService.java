@@ -1,4 +1,4 @@
-package be.technobel.corder.bl;
+package be.technobel.corder.bl.services;
 
 import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.pl.models.dtos.DashboardDTO;

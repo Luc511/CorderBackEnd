@@ -1,8 +1,8 @@
 package be.technobel.corder.dl.datainit;
 
 
-import be.technobel.corder.bl.ParticipationService;
-import be.technobel.corder.bl.UserService;
+import be.technobel.corder.bl.services.ParticipationService;
+import be.technobel.corder.bl.services.UserService;
 import be.technobel.corder.dl.models.enums.Role;
 import be.technobel.corder.dl.models.enums.Status;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
@@ -29,23 +29,11 @@ public class DataInitialization {
 
     @Bean
     CommandLineRunner initDatabase(
-            ParticipationService participationService,
-            UserService userService
+            ParticipationService participationService
     ) {
         return args -> {
             Faker faker = new Faker(Locale.FRENCH);
-
-            //Create User
-            userService.register(
-                    new UserForm(
-                            "test",
-                            "Test1234=",
-                            Set.of(Role.ADMIN)
-                    )
-            );
-
             for (int i = 0; i < 10; i++) {
-
 
                 String imageUrl = "https://picsum.photos/200/300";
 

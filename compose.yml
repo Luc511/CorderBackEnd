@@ -40,6 +40,7 @@ services:
       - DDL=validate
       - SMTP_HOST=sandbox.smtp.mailtrap.io
       - SMTP_PASSWORD=570e8bf1b9ab8a
-      - SMTP_PORT=25
+      - SMTP_PORT=465
       - SMTP_USERNAME=16f4841f49d2f9
       - DATA_INIT=false
+      - USER_INIT=true
