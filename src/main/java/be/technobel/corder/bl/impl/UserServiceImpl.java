@@ -1,6 +1,6 @@
 package be.technobel.corder.bl.impl;
 
-import be.technobel.corder.bl.UserService;
+import be.technobel.corder.bl.services.UserService;
 import be.technobel.corder.dl.models.User;
 import be.technobel.corder.dl.repositories.UserRepository;
 import be.technobel.corder.pl.config.exceptions.DuplicateUserException;
@@ -19,6 +19,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Implementation of the UserService interface.
+ */
 @Service
 public class UserServiceImpl implements UserService {
 
@@ -34,9 +37,16 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Registers a user with the specified user form.
+     *
+     * @param form the user form containing the user details
+     * @throws IllegalArgumentException if the form is null
+     * @throws DuplicateUserException   if the login specified in the form is already used by another user
+     */
     @Override
     public void register(UserForm form) {
-        if(form == null)
+        if (form == null)
             throw new IllegalArgumentException("form peut pas être null");
         if (userRepository.existsByLogin(form.login()))
             throw new DuplicateUserException("Login already used");
@@ -48,10 +58,17 @@ public class UserServiceImpl implements UserService {
         userRepository.save(entity);
     }
 
+    /**
+     * Authenticates a user and returns an AuthDTO object containing the generated token, login, and roles.
+     *
+     * @param form The login form containing the user's login and password.
+     * @return An AuthDTO object containing the generated token, login, and roles.
+     * @throws UsernameNotFoundException If the username is not found in the UserRepository.
+     */
     @Override
     public AuthDTO login(LoginForm form) {
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(form.login(),form.password()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(form.login(), form.password()));
 
         Optional<User> optionalUser = userRepository.findByLogin(form.login());
         if (optionalUser.isPresent()) {
@@ -69,6 +86,13 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    /**
+     * Changes the password of a user.
+     *
+     * @param passwordChangeForm the form containing the user's login, current password, and new password
+     * @throws InvalidPasswordException  if the current password is invalid
+     * @throws UsernameNotFoundException if the user is not found
+     */
     @Override
     public void changePassword(PasswordChangeForm passwordChangeForm) {
         String login = passwordChangeForm.user();
@@ -79,7 +103,7 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            if(!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
                 throw new InvalidPasswordException("Current password invalid");
             }
 

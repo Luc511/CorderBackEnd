@@ -36,24 +36,24 @@ public class JWTProvider {
         this.userDetailsService = userDetailsService;
     }
 
-    public String generateToken(String username, List<Role> roles){
+    public String generateToken(String username, List<Role> roles) {
         return TOKEN_PREFIX + JWT.create()
                 .withSubject(username)
-                .withClaim("roles",roles.stream().map(Enum::toString).toList())
+                .withClaim("roles", roles.stream().map(Enum::toString).toList())
                 .withExpiresAt(Instant.now().plusMillis(EXPIRES_AT))
                 .sign(Algorithm.HMAC512(JWT_SECRET));
     }
 
-    public String extractToken(HttpServletRequest request){
+    public String extractToken(HttpServletRequest request) {
         String header = request.getHeader(AUTH_HEADER);
 
-        if(header == null || !header.startsWith(TOKEN_PREFIX))
+        if (header == null || !header.startsWith(TOKEN_PREFIX))
             return null;
 
-        return header.replaceFirst(TOKEN_PREFIX,"");
+        return header.replaceFirst(TOKEN_PREFIX, "");
     }
 
-    public boolean validateToken(String token){
+    public boolean validateToken(String token) {
 
         try {
 
@@ -78,12 +78,12 @@ public class JWTProvider {
             return user.getRoles().containsAll(tokenRoles);
 
 
-        }catch (JWTVerificationException | UsernameNotFoundException ex) {
+        } catch (JWTVerificationException | UsernameNotFoundException ex) {
             return false;
         }
     }
 
-    public Authentication createAuthentication(String token){
+    public Authentication createAuthentication(String token) {
         DecodedJWT jwt = JWT.decode(token);
 
         String username = jwt.getSubject();
