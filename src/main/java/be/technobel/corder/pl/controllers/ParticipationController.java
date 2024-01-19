@@ -1,6 +1,6 @@
 package be.technobel.corder.pl.controllers;
 
-import be.technobel.corder.bl.ParticipationService;
+import be.technobel.corder.bl.services.ParticipationService;
 import be.technobel.corder.dl.models.Participation;
 import be.technobel.corder.pl.models.dtos.*;
 import be.technobel.corder.pl.models.forms.ParticipationForm;
@@ -11,10 +11,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * The ParticipationController class handles the endpoints related to participations.
+ */
 @RestController
 @RequestMapping("/participation")
 public class ParticipationController {

@@ -31,3 +31,4 @@ server:
 
 api:
   data-init: ${DATA_INIT}
+  user-init: ${USER_INIT}

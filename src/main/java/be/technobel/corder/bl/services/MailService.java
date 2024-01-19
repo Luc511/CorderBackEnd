@@ -1,4 +1,4 @@
-package be.technobel.corder.bl;
+package be.technobel.corder.bl.services;
 
 import java.util.Map;
 
