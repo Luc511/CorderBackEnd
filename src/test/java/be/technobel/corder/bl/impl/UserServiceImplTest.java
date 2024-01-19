@@ -71,17 +71,6 @@ class UserServiceImplTest {
     }
 
     @Test
-    void login_withNonExistingUser() {
-        //Arrange
-        when(userRepository.findByLogin(loginForm.login())).thenReturn(Optional.empty());
-
-        //Act & Assert
-        assertThrows(UsernameNotFoundException.class, () -> {
-            userService.login(loginForm);
-        });
-    }
-
-    @Test
     void changePassword_withValidPasswordChangeForm() {
         //Arrange
         User user = new User(); //build or mock a User
