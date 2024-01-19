@@ -2,7 +2,6 @@ package be.technobel.corder.pl.models.forms;
 
 import be.technobel.corder.dl.models.Address;
 import be.technobel.corder.dl.models.Participation;
-import be.technobel.corder.dl.models.enums.ProductType;
 import be.technobel.corder.dl.models.enums.Status;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
@@ -22,20 +21,20 @@ public record ParticipationForm(
         boolean acceptNewsletter,
         boolean acceptExposure
 ) {
-        public Participation toEntity() {
-                return Participation.builder()
-                        .firstName(firstName)
-                        .lastName(lastName)
-                        .email(email)
-                        .status(status)
-                        .productType(productType)
-                        .address(Address.builder()
-                                .city(city)
-                                .street(street)
-                                .postCode(postCode)
-                                .build())
-                        .acceptNewsletter(acceptNewsletter)
-                        .acceptExposure(acceptExposure)
-                        .build();
-        }
+    public Participation toEntity() {
+        return Participation.builder()
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .status(status)
+                .productType(productType)
+                .address(Address.builder()
+                        .city(city)
+                        .street(street)
+                        .postCode(postCode)
+                        .build())
+                .acceptNewsletter(acceptNewsletter)
+                .acceptExposure(acceptExposure)
+                .build();
+    }
 }

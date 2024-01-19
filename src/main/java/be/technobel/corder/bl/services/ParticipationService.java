@@ -13,26 +13,48 @@ import java.util.Map;
 
 public interface ParticipationService {
     Participation create(ParticipationForm participationForm);
+
     List<Participation> findAll();
+
     Participation findById(Long id);
+
     void addPhoto(MultipartFile photo, Long id);
+
     void addSatisfaction(SatisfactionForm satisfactionForm);
+
     void validate(Long id);
+
     void deny(Long id);
+
     void ship(Long id);
+
     Long[] getWeek(LocalDate firstDay);
-    Map<String,Long> getWeekWithDays();
+
+    Map<String, Long> getWeekWithDays();
+
     Long countParticipation();
+
     Long[] countParticipationLast5Months();
+
     Map<String, Long> countByProvince();
+
     Map<String, Long> countByProductType();
+
     List<String> otherProductType();
+
     Long[] countNotes();
+
     Map<String, Long> countSatisfactionComments();
+
     List<String> allOtherSatisfactionComments();
+
     StatsDTO statsDTOBuilder();
+
     Long[] last3Pending();
+
     Long[] last3Validated();
+
     DashboardDTO dashboardDTOBuilder();
+
     Participation findByEmail(String email);
 }

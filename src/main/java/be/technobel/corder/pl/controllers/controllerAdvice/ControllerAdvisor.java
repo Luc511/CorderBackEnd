@@ -9,14 +9,10 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.mail.MailSendException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MultipartException;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @RestControllerAdvice
 public class ControllerAdvisor {
@@ -39,6 +35,7 @@ public class ControllerAdvisor {
     public ResponseEntity<ErrorDTO> handleMultipartException(MultipartException e) {
         return new ResponseEntity<>(new ErrorDTO(e.getMessage(), ""), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorDTO> handleValidationExceptions(MethodArgumentNotValidException e) {
         return new ResponseEntity<>(new ErrorDTO(e.getMessage(), ""), HttpStatus.BAD_REQUEST);
@@ -63,18 +60,22 @@ public class ControllerAdvisor {
     public ResponseEntity<ErrorDTO> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
         return new ResponseEntity<>(new ErrorDTO(e.getMessage(), ""), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(InvalidPasswordException.class)
     public ResponseEntity<ErrorDTO> handleInvalidPasswordException(InvalidPasswordException e) {
         return new ResponseEntity<>(new ErrorDTO(e.getMessage(), ""), HttpStatus.BAD_REQUEST);
     }
+
     @ExceptionHandler(MailSendException.class)
     public ResponseEntity<ErrorDTO> handleMailSendException(MailSendException e) {
         return new ResponseEntity<>(new ErrorDTO(e.getMessage(), ""), HttpStatus.SERVICE_UNAVAILABLE);
     }
+
     @ExceptionHandler(TooManyRequestsException.class)
     public ResponseEntity<ErrorDTO> handleTooManyRequestsException(TooManyRequestsException e) {
         return new ResponseEntity<>(new ErrorDTO(e.getMessage(), ""), HttpStatus.TOO_MANY_REQUESTS);
     }
+
     @ExceptionHandler(DuplicateUserException.class)
     public ResponseEntity<ErrorDTO> handleDuplicateUserException(DuplicateUserException e) {
         return new ResponseEntity<>(new ErrorDTO(e.getMessage(), ""), HttpStatus.NOT_ACCEPTABLE);

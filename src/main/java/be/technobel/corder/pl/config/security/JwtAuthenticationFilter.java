@@ -27,7 +27,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = jwtProvider.extractToken(request);
 
         //2. valider le token
-        if(token!= null && jwtProvider.validateToken(token)) {
+        if (token != null && jwtProvider.validateToken(token)) {
 
             //3. recuperer l'user du token
             //4. créer Authentication user
@@ -38,6 +38,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         //6. renvoyer vers la suite des filtres
-        filterChain.doFilter(request,response);
+        filterChain.doFilter(request, response);
     }
 }

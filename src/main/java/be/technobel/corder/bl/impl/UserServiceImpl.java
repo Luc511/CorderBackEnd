@@ -42,11 +42,11 @@ public class UserServiceImpl implements UserService {
      *
      * @param form the user form containing the user details
      * @throws IllegalArgumentException if the form is null
-     * @throws DuplicateUserException if the login specified in the form is already used by another user
+     * @throws DuplicateUserException   if the login specified in the form is already used by another user
      */
     @Override
     public void register(UserForm form) {
-        if(form == null)
+        if (form == null)
             throw new IllegalArgumentException("form peut pas être null");
         if (userRepository.existsByLogin(form.login()))
             throw new DuplicateUserException("Login already used");
@@ -68,7 +68,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public AuthDTO login(LoginForm form) {
 
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(form.login(),form.password()));
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(form.login(), form.password()));
 
         Optional<User> optionalUser = userRepository.findByLogin(form.login());
         if (optionalUser.isPresent()) {
@@ -90,7 +90,7 @@ public class UserServiceImpl implements UserService {
      * Changes the password of a user.
      *
      * @param passwordChangeForm the form containing the user's login, current password, and new password
-     * @throws InvalidPasswordException if the current password is invalid
+     * @throws InvalidPasswordException  if the current password is invalid
      * @throws UsernameNotFoundException if the user is not found
      */
     @Override
@@ -103,7 +103,7 @@ public class UserServiceImpl implements UserService {
         if (optionalUser.isPresent()) {
             User user = optionalUser.get();
 
-            if(!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
                 throw new InvalidPasswordException("Current password invalid");
             }
 

@@ -20,6 +20,7 @@ import java.util.Map;
 public class MailServiceImpl implements MailService {
     private final JavaMailSender mailSender;
     private final TemplateEngine templateEngine;
+
     public MailServiceImpl(JavaMailSender mailSender, TemplateEngine templateEngine) {
         this.mailSender = mailSender;
         this.templateEngine = templateEngine;
@@ -28,14 +29,14 @@ public class MailServiceImpl implements MailService {
     /**
      * Sends an email.
      *
-     * @param to              the recipient's email address
-     * @param subject         the subject of the email
-     * @param content         the content of the email
-     * @param isHtmlContent   true if the email content is HTML, false otherwise
+     * @param to            the recipient's email address
+     * @param subject       the subject of the email
+     * @param content       the content of the email
+     * @param isHtmlContent true if the email content is HTML, false otherwise
      * @throws MailSendException if there is an error sending the email
      */
     @Override
-    public void sendMail(String to, String subject, String content, boolean isHtmlContent){
+    public void sendMail(String to, String subject, String content, boolean isHtmlContent) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message);
@@ -44,7 +45,7 @@ public class MailServiceImpl implements MailService {
             helper.setSubject(subject);
             helper.setText(content, isHtmlContent);
             mailSender.send(message);
-        }catch (MessagingException e) {
+        } catch (MessagingException e) {
             throw new MailSendException("Failed to send email", e);
         }
     }
@@ -52,8 +53,8 @@ public class MailServiceImpl implements MailService {
     /**
      * Builds an email template by processing the given template with the provided variables.
      *
-     * @param template   the email template to be processed
-     * @param variables  the map of variables to be used in the template processing
+     * @param template  the email template to be processed
+     * @param variables the map of variables to be used in the template processing
      * @return the built email template as a string
      */
     @Override
