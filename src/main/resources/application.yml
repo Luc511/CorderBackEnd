@@ -32,3 +32,10 @@ server:
 api:
   data-init: ${DATA_INIT}
   user-init: ${USER_INIT}
+
+corder:
+  username: ${CORDER_USERNAME}
+  password: ${CORDER_PASSWORD}
+cet:
+  username: ${CET_USERNAME}
+  password: ${CET_PASSWORD}
